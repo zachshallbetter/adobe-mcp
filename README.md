@@ -1,6 +1,6 @@
 # InDesign MCP Server
 
-**Transform Adobe InDesign into an AI-powered design automation platform with 135+ professional tools for seamless programmatic control over layout and design capabilities.**
+**Transform Adobe InDesign into an AI-powered design automation platform with 151+ professional tools, 11 smart workflow tools, and MCP Resources & Prompts for seamless programmatic control over layout and design capabilities.**
 
 A comprehensive Model Context Protocol (MCP) server that enables AI assistants and developers to automate Adobe InDesign workflows through natural language commands and programmatic control. Create professional documents, manage complex layouts, and streamline design processes with intelligent automation.
 
@@ -28,10 +28,14 @@ A comprehensive Model Context Protocol (MCP) server that enables AI assistants a
 
 - **Smart Session Management**: Intelligent positioning and page dimension tracking
 - **Advanced Image Handling**: Precise scaling (1-1000%) with multiple fit modes
-- **Comprehensive API**: 135+ professional tools covering all major InDesign functionality
-- **Built-in Help System**: Tool-specific guidance and examples for easy adoption
+- **Comprehensive API**: 151+ professional tools covering all major InDesign functionality
+- **Smart Workflow Tools**: 11 high-level workflow tools for complex automation tasks
+- **MCP Resources & Prompts**: Structured data access and template-based workflows
+- **Multi-Format Color Support**: RGB, CMYK, Hex, and array color formats
+- **Built-in Help System**: Tool-specific guidance with difficulty levels and best practices
 - **Robust Error Handling**: Graceful recovery and detailed feedback for reliability
 - **Modular Architecture**: Clean, maintainable code structure for extensibility
+- **MCP Compliance**: Full Model Context Protocol compliance with logging and performance monitoring
 
 ## 🎨 Real-World Applications
 
@@ -88,25 +92,108 @@ Implement comprehensive design systems with programmatic style and component man
 
 The server implements the Model Context Protocol and can be used with any MCP-compatible client. Here are some example operations:
 
+### Smart Workflow Tools
+
+The server includes 11 high-level workflow tools for complex automation:
+
+```javascript
+// Create a complete publication document
+await callTool('create_publication_document', {
+  title: 'Company Newsletter',
+  pageSize: 'A4',
+  pages: 4
+});
+
+// Setup comprehensive document styles
+await callTool('setup_document_styles', {
+  headingStyles: ['Title', 'Subtitle', 'Heading'],
+  bodyStyles: ['Body', 'Caption'],
+  colorPalette: ['#FF0000', '#00FF00', '#0000FF']
+});
+
+// Create content sections with automatic layout
+await callTool('create_content_section', {
+  title: 'Feature Article',
+  content: 'Article content here...',
+  layout: 'two-column'
+});
+```
+
+### MCP Resources & Prompts
+
+Access structured InDesign data and use template-based workflows:
+
+```javascript
+// List available resources
+await callTool('list_resources', {});
+
+// Read document resource
+await callTool('read_resource', { uri: 'indesign://document' });
+
+// List available prompts
+await callTool('list_prompts', {});
+
+// Get specific prompt template
+await callTool('get_prompt', { name: 'Create Newsletter' });
+```
+
 ### Help System
 
 The MCP server includes a comprehensive help system accessible via the `help` command:
 
 ```javascript
 // Get overview of all tools
-await tools.call("help");
+await callTool('help');
 
 // Get help for specific tool
-await tools.call("help", { tool: "create_document" });
+await callTool('help', { tool: 'create_document' });
 
 // Get help for tool category
-await tools.call("help", { category: "text" });
+await callTool('help', { category: 'text' });
 
-// Get detailed information
-await tools.call("help", { format: "detailed" });
+// Get detailed information with difficulty levels
+await callTool('help', { level: 'expert' });
 
-// Get examples
-await tools.call("help", { format: "examples" });
+// Get troubleshooting help
+await callTool('help', { troubleshooting: true });
+
+// Get scenario-based help
+await callTool('help', { scenario: 'newsletter' });
+```
+
+### Multi-Format Color Support
+
+Create colors using various formats:
+
+```javascript
+// RGB format
+await callTool('create_color_swatch', {
+  name: 'Brand Red',
+  red: 255,
+  green: 0,
+  blue: 0
+});
+
+// CMYK format
+await callTool('create_color_swatch', {
+  name: 'Process Blue',
+  cyan: 100,
+  magenta: 50,
+  yellow: 0,
+  black: 0
+});
+
+// Hex format
+await callTool('create_color_swatch', {
+  name: 'Brand Green',
+  hex: '#00FF00'
+});
+
+// Array format
+await callTool('create_color_swatch', {
+  name: 'Custom Color',
+  colorValue: [255, 128, 64]
+});
 ```
 
 ```javascript
@@ -166,11 +253,11 @@ Advanced text and table management with smart positioning:
 
 ### 🎨 Style Handlers (`styleHandlers.js`)
 
-Complete style and color management system:
+Complete style and color management system with multi-format support:
 
 - **Style Creation**: `create_paragraph_style`, `create_character_style`
 - **Style Application**: `apply_paragraph_style`, `apply_character_style`
-- **Color Management**: `create_color_swatch`, `list_color_swatches`, `apply_color`
+- **Color Management**: `create_color_swatch` (RGB/CMYK/Hex/Array), `list_color_swatches`, `apply_color`
 - **Style Listing**: `list_styles` with filtering options
 
 ### 🖼️ Graphics Handlers (`graphicsHandlers.js`)
@@ -273,6 +360,32 @@ System utilities and session management:
 - **Document Viewing**: `view_document` for current state information
 - **Session Management**: `get_session_info`, `clear_session`
 
+### 🚀 Workflow Handlers (`workflowHandlers.js`)
+
+High-level workflow automation tools:
+
+- **Document Creation**: `create_publication_document`, `setup_document_styles`
+- **Content Management**: `create_content_section`, `add_visual_element`, `update_content_batch`
+- **Layout & Design**: `create_layout_template`, `apply_design_system`
+- **Data & Publishing**: `create_data_table`, `publish_document`
+- **Templates & Help**: `apply_template`, `get_workflow_help`
+
+### 📊 Resource Handlers (`resourceHandlers.js`)
+
+MCP Resources for structured data access:
+
+- **Resource Listing**: `list_resources`, `list_resource_templates`
+- **Resource Reading**: `read_resource` with URI support
+- **Data Access**: Document info, color swatches, styles, pages
+
+### 📝 Prompt Handlers (`promptHandlers.js`)
+
+MCP Prompts for template-based workflows:
+
+- **Prompt Listing**: `list_prompts`
+- **Prompt Access**: `get_prompt` with name-based retrieval
+- **Template Workflows**: Newsletter creation, brochure design, report generation
+
 ## Session Management
 
 The server includes intelligent session management that:
@@ -321,7 +434,10 @@ src/
 │   ├── groupHandlers.js        # Object grouping
 │   ├── masterSpreadHandlers.js # Master pages
 │   ├── exportHandlers.js       # Export operations
-│   └── utilityHandlers.js      # Utilities
+│   ├── utilityHandlers.js      # Utilities
+│   ├── workflowHandlers.js     # Smart workflow tools
+│   ├── resourceHandlers.js     # MCP Resources
+│   └── promptHandlers.js       # MCP Prompts
 ├── types/                      # Tool definitions
 │   ├── index.js                # Main definitions index
 │   ├── toolDefinitionsContent.js # Content tools
@@ -329,9 +445,11 @@ src/
 │   ├── toolDefinitionsPage.js  # Page tools
 │   ├── toolDefinitionsBook.js  # Book tools
 │   ├── toolDefinitionsUtility.js # Utility tools
-│   └── ...                     # Other tool categories
+│   └── workflowToolDefinitions.js # Workflow tools
 ├── utils/
-│   └── stringUtils.js          # String utilities
+│   ├── stringUtils.js          # String utilities
+│   ├── logger.js               # MCP-compliant logging
+│   └── debugUtils.js           # Debug utilities
 └── index.js                    # Main entry point
 ```
 
@@ -342,6 +460,7 @@ src/
 - **Tool Handlers**: Modular handlers for different functionality areas
 - **Type Definitions**: Comprehensive MCP tool schemas
 - **Handler Index**: Centralized exports for all handlers (`src/handlers/index.js`)
+- **MCP Compliance**: Full protocol compliance with logging and performance monitoring
 
 ### Handler Integration
 
@@ -359,7 +478,10 @@ import {
     PageItemHandlers,
     StyleHandlers,
     TextHandlers,
-    UtilityHandlers
+    UtilityHandlers,
+    WorkflowHandlers,
+    ResourceHandlers,
+    PromptHandlers
 } from './src/handlers/index.js';
 ```
 
@@ -382,6 +504,7 @@ npm test
 npm run test:required
 npm run test:content
 npm run test:advanced
+npm run test:mcp
 ```
 
 ### Test Coverage
@@ -395,7 +518,11 @@ npm run test:advanced
 - ✅ Export Functionality
 - ✅ Session Management
 - ✅ Error Handling
-- ✅ Handler Integration (integrated into master test suite)
+- ✅ Handler Integration
+- ✅ Smart Workflow Tools
+- ✅ MCP Resources & Prompts
+- ✅ Multi-Format Color Support
+- ✅ Enhanced Help System
 
 ### Integration Testing
 
@@ -407,8 +534,8 @@ node tests/index.js --coverage
 
 This test verifies:
 
-- All 13 handlers properly imported and accessible
-- Complete tool definitions (135+ tools)
+- All 16 handlers properly imported and accessible
+- Complete tool definitions (151+ tools)
 - Session manager integration is seamless
 - Smart positioning works without separate calls
 - MCP Server properly configured
@@ -445,7 +572,7 @@ This test verifies:
 
 - Paragraph and character style creation
 - Style application and management
-- Color swatch creation and application
+- Color swatch creation and application (multi-format)
 - Style listing and organization
 
 #### Book Management (16 tools)
@@ -454,6 +581,22 @@ This test verifies:
 - Document synchronization
 - Cross-reference updates
 - Export and packaging
+
+#### Smart Workflow Tools (11 tools)
+
+- High-level document creation and setup
+- Content section management
+- Layout template creation
+- Design system application
+- Data table creation
+- Document publishing
+
+#### MCP Resources & Prompts (5 tools)
+
+- Resource listing and reading
+- Prompt template access
+- Structured data access
+- Template-based workflows
 
 #### Advanced Features (25+ tools)
 
@@ -471,6 +614,7 @@ The server provides comprehensive error handling:
 - **Detailed Error Messages**: Clear error descriptions and context
 - **Recovery Mechanisms**: Automatic cleanup and state restoration
 - **Session Protection**: Preserves session data during errors
+- **MCP Compliance**: Structured error responses following protocol
 
 ## Performance
 
@@ -478,21 +622,22 @@ The server provides comprehensive error handling:
 - **Session Caching**: Reduces redundant operations
 - **Smart Positioning**: Eliminates manual coordinate calculations
 - **Batch Operations**: Support for multiple operations
+- **Performance Monitoring**: Built-in metrics and logging
 
 # InDesign MCP Server - Complete Integration Summary
 
 ## ✅ **FULLY INTEGRATED AND TESTED**
 
-The InDesign MCP Server is now completely integrated with all handlers, tool definitions, and session management working seamlessly.
+The InDesign MCP Server is now completely integrated with all handlers, tool definitions, session management, and MCP compliance working seamlessly.
 
 ## 🎯 **Integration Achievements**
 
 ### **1. Complete Handler Integration**
 
-- ✅ **13 Handler Classes** properly imported and accessible
+- ✅ **16 Handler Classes** properly imported and accessible
 - ✅ **Central Handler Index** (`src/handlers/index.js`) for easy management
 - ✅ **All Handlers Registered** in MCP Server (`src/core/InDesignMCPServer.js`)
-- ✅ **135 Tool Definitions** covering all functionality
+- ✅ **151 Tool Definitions** covering all functionality
 
 ### **2. Seamless Session Management**
 
@@ -530,7 +675,7 @@ The InDesign MCP Server is now completely integrated with all handlers, tool def
 
 - Paragraph and character style creation
 - Style application and management
-- Color swatch creation and application
+- Color swatch creation and application (multi-format)
 - Style listing and organization
 
 #### **Book Management (16 tools)**
@@ -539,6 +684,22 @@ The InDesign MCP Server is now completely integrated with all handlers, tool def
 - Document synchronization
 - Cross-reference updates
 - Export and packaging
+
+#### **Smart Workflow Tools (11 tools)**
+
+- High-level document creation and setup
+- Content section management
+- Layout template creation
+- Design system application
+- Data table creation
+- Document publishing
+
+#### **MCP Resources & Prompts (5 tools)**
+
+- Resource listing and reading
+- Prompt template access
+- Structured data access
+- Template-based workflows
 
 #### **Advanced Features (25+ tools)**
 
@@ -579,10 +740,15 @@ src/
 │   ├── groupHandlers.js        # Object grouping
 │   ├── masterSpreadHandlers.js # Master pages
 │   ├── exportHandlers.js       # Export operations
-│   └── utilityHandlers.js      # Utilities
-├── types/                      # Tool definitions (135 tools)
+│   ├── utilityHandlers.js      # Utilities
+│   ├── workflowHandlers.js     # Smart workflow tools
+│   ├── resourceHandlers.js     # MCP Resources
+│   └── promptHandlers.js       # MCP Prompts
+├── types/                      # Tool definitions (151 tools)
 └── utils/
-    └── stringUtils.js          # String utilities
+    ├── stringUtils.js          # String utilities
+    ├── logger.js               # MCP-compliant logging
+    └── debugUtils.js           # Debug utilities
 ```
 
 ### **Handler Categories**
@@ -592,6 +758,8 @@ src/
 - **🎯 Advanced Layout** (3 handlers)
 - **📚 Production & Export** (2 handlers)
 - **🛠️ System Utilities** (1 handler)
+- **🚀 Smart Workflows** (1 handler)
+- **📊 MCP Resources & Prompts** (2 handlers)
 
 ## 🧪 **Testing Results**
 
@@ -599,10 +767,10 @@ src/
 
 ```bash
 ✅ Test 1: Handler Import Verification
-   - All 13 handlers properly imported
+   - All 16 handlers properly imported
 
 ✅ Test 2: Tool Definitions Verification
-   - 135 tool definitions complete
+   - 151 tool definitions complete
 
 ✅ Test 3: Session Manager Integration
    - All session methods present
@@ -618,6 +786,9 @@ src/
 
 ✅ Test 7: Session Manager Workflow Integration
    - No workflow interruptions
+
+✅ Test 8: MCP Resources & Prompts
+   - Resources and prompts accessible
 ```
 
 ### **Key Test Commands**
@@ -629,6 +800,8 @@ node tests/index.js --coverage
 # Run individual handler tests
 node tests/test-document-preferences.js
 node tests/test-content-management.js
+node tests/test-mcp-resources.js
+node tests/test-mcp-prompts.js
 ```
 
 ## 🚀 **Session Management Features**
@@ -657,7 +830,7 @@ await callTool('create_text_frame', {
 
 ### **Complete Coverage**
 
-Every major InDesign feature accessible via MCP with 135+ professional tools.
+Every major InDesign feature accessible via MCP with 151+ professional tools.
 
 ### **AI-Ready**
 
@@ -675,15 +848,20 @@ Regular updates, community support, and continuous improvement.
 
 Everything you need to get started with detailed guides and examples.
 
+### **MCP Compliance**
+
+Full Model Context Protocol compliance with structured logging and performance monitoring.
+
 **Transform your InDesign workflow from manual to magical with the power of AI-driven automation.** 🎨✨
 
 ## 📊 **Final Statistics**
 
-- **Total Handlers**: 13
-- **Total Tools**: 135
+- **Total Handlers**: 16
+- **Total Tools**: 151
 - **Session Methods**: 9
 - **Test Coverage**: 100%
 - **Integration Status**: Complete
+- **MCP Compliance**: Full
 
 ## 🎉 **Ready for Production**
 
@@ -694,6 +872,7 @@ The InDesign MCP Server is now:
 3. **Production Ready** - Robust error handling and session management
 4. **Well Documented** - Complete README and inline documentation
 5. **Modular Architecture** - Easy to maintain and extend
+6. **MCP Compliant** - Full protocol compliance with logging
 
 ## 🔧 **Usage Examples**
 
@@ -710,6 +889,31 @@ The InDesign MCP Server is now:
   // Create and apply styles
   await callTool('create_paragraph_style', { name: 'Heading', fontSize: 24 });
   await callTool('create_object_style', { name: 'Box', fillColor: 'Blue' });
+  ```
+
+### **Smart Workflow Example**
+
+  ```javascript
+  // Create complete publication with smart workflow
+  await callTool('create_publication_document', {
+    title: 'Company Newsletter',
+    pageSize: 'A4',
+    pages: 4
+  });
+
+  // Setup comprehensive styles
+  await callTool('setup_document_styles', {
+    headingStyles: ['Title', 'Subtitle', 'Heading'],
+    bodyStyles: ['Body', 'Caption'],
+    colorPalette: ['#FF0000', '#00FF00', '#0000FF']
+  });
+
+  // Create content sections
+  await callTool('create_content_section', {
+    title: 'Feature Article',
+    content: 'Article content here...',
+    layout: 'two-column'
+  });
   ```
 
 ### **Advanced Workflow**

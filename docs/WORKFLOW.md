@@ -1,6 +1,6 @@
 # 🚀 Smart Workflow Tools Implementation Complete
 
-We have successfully implemented a revolutionary smart workflow system that transforms the InDesign MCP Server from a complex, low-level automation tool into an intuitive, high-level workflow system. Here's what we accomplished:
+We have successfully implemented a smart workflow system that transforms the InDesign MCP Server from a complex, low-level automation tool into an intuitive, high-level workflow system. Here's what we accomplished:
 
 ---
 

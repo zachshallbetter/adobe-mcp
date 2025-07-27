@@ -368,4 +368,66 @@ export const contentToolDefinitions = [
             required: ['objectIndex', 'colorName'],
         },
     },
+
+    // =================== MCP RESOURCES AND PROMPTS ===================
+    {
+        name: 'list_resources',
+        title: 'List MCP Resources',
+        description: 'List all available MCP Resources for structured data access',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: []
+        }
+    },
+    {
+        name: 'list_resource_templates',
+        title: 'List MCP Resource Templates',
+        description: 'List all available MCP Resource Templates for dynamic data access',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: []
+        }
+    },
+    {
+        name: 'read_resource',
+        title: 'Read MCP Resource',
+        description: 'Read a specific MCP Resource by URI',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                uri: {
+                    type: 'string',
+                    description: 'The URI of the resource to read'
+                }
+            },
+            required: ['uri']
+        }
+    },
+    {
+        name: 'list_prompts',
+        title: 'List MCP Prompts',
+        description: 'List all available MCP Prompts for template-based workflows',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: []
+        }
+    },
+    {
+        name: 'get_prompt',
+        title: 'Get MCP Prompt',
+        description: 'Get details of a specific MCP Prompt by name',
+        inputSchema: {
+            type: 'object',
+            properties: {
+                name: {
+                    type: 'string',
+                    description: 'The name of the prompt to retrieve'
+                }
+            },
+            required: ['name']
+        }
+    }
 ]; 

@@ -77,59 +77,8 @@ export class InDesignMCPServer {
             }
         });
 
-        // Resources handlers
-        this.server.setRequestHandler('resources/list', async () => {
-            try {
-                const resources = await ResourceHandlers.listResources();
-                return { resources };
-            } catch (error) {
-                logger.error('Failed to list resources', { error: error.message });
-                throw error;
-            }
-        });
-
-        this.server.setRequestHandler('resources/templates/list', async () => {
-            try {
-                const templates = await ResourceHandlers.listResourceTemplates();
-                return { templates };
-            } catch (error) {
-                logger.error('Failed to list resource templates', { error: error.message });
-                throw error;
-            }
-        });
-
-        this.server.setRequestHandler('resources/read', async (request) => {
-            const { uri } = request.params;
-            try {
-                const resource = await ResourceHandlers.readResource(uri);
-                return { resource };
-            } catch (error) {
-                logger.error('Failed to read resource', { uri, error: error.message });
-                throw error;
-            }
-        });
-
-        // Prompts handlers
-        this.server.setRequestHandler('prompts/list', async () => {
-            try {
-                const prompts = await PromptHandlers.listPrompts();
-                return { prompts };
-            } catch (error) {
-                logger.error('Failed to list prompts', { error: error.message });
-                throw error;
-            }
-        });
-
-        this.server.setRequestHandler('prompts/get', async (request) => {
-            const { name } = request.params;
-            try {
-                const prompt = await PromptHandlers.getPrompt(name);
-                return { prompt };
-            } catch (error) {
-                logger.error('Failed to get prompt', { name, error: error.message });
-                throw error;
-            }
-        });
+        // TODO: Add proper MCP Resources and Prompts handlers with correct schemas
+        // For now, these are implemented as regular tools in the handleToolCall method
     }
 
     async handleToolCall(name, args) {
@@ -148,6 +97,15 @@ export class InDesignMCPServer {
             case 'publish_document': return await WorkflowHandlers.publishDocument(args);
             case 'get_workflow_help': return await WorkflowHandlers.getWorkflowHelp(args);
             case 'apply_template': return await WorkflowHandlers.applyTemplate(args);
+
+            // MCP Resources (as tools for now)
+            case 'list_resources': return await ResourceHandlers.listResources();
+            case 'list_resource_templates': return await ResourceHandlers.listResourceTemplates();
+            case 'read_resource': return await ResourceHandlers.readResource(args.uri);
+
+            // MCP Prompts (as tools for now)
+            case 'list_prompts': return await PromptHandlers.listPrompts();
+            case 'get_prompt': return await PromptHandlers.getPrompt(args.name);
 
             // Document Management
             case 'get_document_info': return await DocumentHandlers.getDocumentInfo();

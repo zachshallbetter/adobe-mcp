@@ -5,7 +5,8 @@
  * Based on MCP Resources specification
  */
 
-import { executeExtendScript } from '../utils/extendScriptUtils.js';
+import { ScriptExecutor } from '../core/scriptExecutor.js';
+import { formatResponse, formatErrorResponse } from '../utils/stringUtils.js';
 import { logger } from '../utils/logger.js';
 
 export class ResourceHandlers {
@@ -15,100 +16,83 @@ export class ResourceHandlers {
     static async listResources() {
         try {
             const script = `
-                try {
-                    var resources = [];
+                var docCount = app.documents.length;
+                var result = "SUCCESS:";
+                
+                if (docCount > 0) {
+                    result = result + "active-document|Active Document|indesign://document/active;";
                     
-                    // Document resources
-                    if (app.documents.length > 0) {
-                        var doc = app.activeDocument;
-                        resources.push({
-                            uri: "indesign://document/active",
-                            name: "active-document",
-                            title: "Active Document",
-                            description: "Currently active InDesign document",
-                            mimeType: "application/json"
-                        });
-                        
-                        resources.push({
-                            uri: "indesign://document/" + doc.name,
-                            name: "document-" + doc.name.replace(/[^a-zA-Z0-9]/g, '-'),
-                            title: "Document: " + doc.name,
-                            description: "InDesign document: " + doc.name,
-                            mimeType: "application/json"
-                        });
+                    var doc = app.activeDocument;
+                    var docName = doc.name.replace(/[^a-zA-Z0-9]/g, '-');
+                    result = result + "document-" + docName + "|Document: " + doc.name + "|indesign://document/" + doc.name + ";";
+                    
+                    if (doc.colors.length > 0) {
+                        result = result + "color-swatches|Color Swatches|indesign://colors/swatches;";
                     }
                     
-                    // Color swatches
-                    if (app.documents.length > 0) {
-                        var doc = app.activeDocument;
-                        if (doc.colorSwatches.length > 0) {
-                            resources.push({
-                                uri: "indesign://colors/swatches",
-                                name: "color-swatches",
-                                title: "Color Swatches",
-                                description: "All color swatches in the active document",
-                                mimeType: "application/json"
-                            });
-                        }
+                    if (doc.paragraphStyles.length > 0) {
+                        result = result + "paragraph-styles|Paragraph Styles|indesign://styles/paragraph;";
                     }
                     
-                    // Styles
-                    if (app.documents.length > 0) {
-                        var doc = app.activeDocument;
-                        if (doc.paragraphStyles.length > 0) {
-                            resources.push({
-                                uri: "indesign://styles/paragraph",
-                                name: "paragraph-styles",
-                                title: "Paragraph Styles",
-                                description: "All paragraph styles in the active document",
-                                mimeType: "application/json"
-                            });
-                        }
-                        
-                        if (doc.characterStyles.length > 0) {
-                            resources.push({
-                                uri: "indesign://styles/character",
-                                name: "character-styles",
-                                title: "Character Styles",
-                                description: "All character styles in the active document",
-                                mimeType: "application/json"
-                            });
-                        }
+                    if (doc.characterStyles.length > 0) {
+                        result = result + "character-styles|Character Styles|indesign://styles/character;";
                     }
                     
-                    // Pages
-                    if (app.documents.length > 0) {
-                        var doc = app.activeDocument;
-                        if (doc.pages.length > 0) {
-                            resources.push({
-                                uri: "indesign://pages/all",
-                                name: "all-pages",
-                                title: "All Pages",
-                                description: "All pages in the active document",
-                                mimeType: "application/json"
-                            });
-                        }
+                    if (doc.pages.length > 0) {
+                        result = result + "all-pages|All Pages|indesign://pages/all;";
                     }
-                    
-                    JSON.stringify(resources);
-                } catch (error) {
-                    "ERROR: " + error.message;
                 }
+                
+                result;
             `;
 
-            const result = await executeExtendScript(script);
+            const result = await ScriptExecutor.executeInDesignScript(script);
 
             if (result.success) {
-                const resources = JSON.parse(result.message);
-                logger.info('Listed resources', { count: resources.length });
-                return resources;
+                try {
+                    // Parse the simple string format
+                    const message = result.message;
+                    if (message.startsWith('SUCCESS:')) {
+                        const resourcesData = message.substring(8);
+                        const resources = [];
+
+                        if (resourcesData) {
+                            const resourceStrings = resourcesData.split(';').filter(s => s.trim());
+                            for (const resourceString of resourceStrings) {
+                                const parts = resourceString.split('|');
+                                if (parts.length >= 3) {
+                                    resources.push({
+                                        name: parts[0],
+                                        title: parts[1],
+                                        uri: parts[2],
+                                        description: "InDesign resource",
+                                        mimeType: "application/json"
+                                    });
+                                }
+                            }
+                        }
+
+                        logger.info('Listed resources', { count: resources.length });
+                        return formatResponse({ resources }, "List Resources");
+                    } else {
+                        const errorMessage = `Unexpected response format: ${message}`;
+                        logger.error('Unexpected response format', { error: errorMessage });
+                        return formatErrorResponse(errorMessage, "List Resources");
+                    }
+                } catch (parseError) {
+                    const errorMessage = `Failed to parse resources: ${parseError.message}. Raw result: ${result.message}`;
+                    logger.error('Failed to parse resources', { error: errorMessage });
+                    return formatErrorResponse(errorMessage, "List Resources");
+                }
             } else {
-                logger.error('Failed to list resources', { error: result.message });
-                return [];
+                const errorMessage = result.message || 'Unknown error occurred';
+                logger.error('Failed to list resources', { error: errorMessage });
+                return formatErrorResponse(errorMessage, "List Resources");
             }
         } catch (error) {
-            logger.error('Error listing resources', { error: error.message });
-            return [];
+            const errorMessage = error.message || 'Unknown error occurred';
+            logger.error('Error listing resources', { error: errorMessage });
+            return formatErrorResponse(errorMessage, "List Resources");
         }
     }
 
@@ -116,53 +100,58 @@ export class ResourceHandlers {
      * List available resource templates
      */
     static async listResourceTemplates() {
-        const templates = [
-            {
-                uriTemplate: "indesign://document/{name}",
-                name: "document-by-name",
-                title: "Document by Name",
-                description: "Access InDesign document by name",
-                mimeType: "application/json"
-            },
-            {
-                uriTemplate: "indesign://page/{number}",
-                name: "page-by-number",
-                title: "Page by Number",
-                description: "Access specific page by number",
-                mimeType: "application/json"
-            },
-            {
-                uriTemplate: "indesign://color/{name}",
-                name: "color-by-name",
-                title: "Color by Name",
-                description: "Access color swatch by name",
-                mimeType: "application/json"
-            },
-            {
-                uriTemplate: "indesign://style/{type}/{name}",
-                name: "style-by-type-and-name",
-                title: "Style by Type and Name",
-                description: "Access style by type (paragraph/character) and name",
-                mimeType: "application/json"
-            },
-            {
-                uriTemplate: "indesign://text-frame/{id}",
-                name: "text-frame-by-id",
-                title: "Text Frame by ID",
-                description: "Access text frame by ID",
-                mimeType: "application/json"
-            },
-            {
-                uriTemplate: "indesign://image/{id}",
-                name: "image-by-id",
-                title: "Image by ID",
-                description: "Access image by ID",
-                mimeType: "application/json"
-            }
-        ];
+        try {
+            const templates = [
+                {
+                    uriTemplate: "indesign://document/{name}",
+                    name: "document-by-name",
+                    title: "Document by Name",
+                    description: "Access InDesign document by name",
+                    mimeType: "application/json"
+                },
+                {
+                    uriTemplate: "indesign://page/{number}",
+                    name: "page-by-number",
+                    title: "Page by Number",
+                    description: "Access specific page by number",
+                    mimeType: "application/json"
+                },
+                {
+                    uriTemplate: "indesign://color/{name}",
+                    name: "color-by-name",
+                    title: "Color by Name",
+                    description: "Access color swatch by name",
+                    mimeType: "application/json"
+                },
+                {
+                    uriTemplate: "indesign://style/{type}/{name}",
+                    name: "style-by-type-and-name",
+                    title: "Style by Type and Name",
+                    description: "Access style by type (paragraph/character) and name",
+                    mimeType: "application/json"
+                },
+                {
+                    uriTemplate: "indesign://text-frame/{id}",
+                    name: "text-frame-by-id",
+                    title: "Text Frame by ID",
+                    description: "Access text frame by ID",
+                    mimeType: "application/json"
+                },
+                {
+                    uriTemplate: "indesign://image/{id}",
+                    name: "image-by-id",
+                    title: "Image by ID",
+                    description: "Access image by ID",
+                    mimeType: "application/json"
+                }
+            ];
 
-        logger.info('Listed resource templates', { count: templates.length });
-        return templates;
+            logger.info('Listed resource templates', { count: templates.length });
+            return formatResponse({ templates }, "List Resource Templates");
+        } catch (error) {
+            logger.error('Error listing resource templates', { error: error.message });
+            return formatErrorResponse(error.message, "List Resource Templates");
+        }
     }
 
     /**
@@ -172,30 +161,33 @@ export class ResourceHandlers {
         try {
             logger.debug('Reading resource', { uri });
 
+            let resource;
             if (uri.startsWith('indesign://document/')) {
-                return await this.readDocumentResource(uri);
+                resource = await this.readDocumentResource(uri);
             } else if (uri.startsWith('indesign://colors/')) {
-                return await this.readColorResource(uri);
+                resource = await this.readColorResource(uri);
             } else if (uri.startsWith('indesign://styles/')) {
-                return await this.readStyleResource(uri);
+                resource = await this.readStyleResource(uri);
             } else if (uri.startsWith('indesign://pages/')) {
-                return await this.readPageResource(uri);
+                resource = await this.readPageResource(uri);
             } else if (uri.startsWith('indesign://page/')) {
-                return await this.readSpecificPageResource(uri);
+                resource = await this.readSpecificPageResource(uri);
             } else if (uri.startsWith('indesign://color/')) {
-                return await this.readSpecificColorResource(uri);
+                resource = await this.readSpecificColorResource(uri);
             } else if (uri.startsWith('indesign://style/')) {
-                return await this.readSpecificStyleResource(uri);
+                resource = await this.readSpecificStyleResource(uri);
             } else if (uri.startsWith('indesign://text-frame/')) {
-                return await this.readTextFrameResource(uri);
+                resource = await this.readTextFrameResource(uri);
             } else if (uri.startsWith('indesign://image/')) {
-                return await this.readImageResource(uri);
+                resource = await this.readImageResource(uri);
             } else {
                 throw new Error(`Unknown resource URI: ${uri}`);
             }
+
+            return formatResponse({ resource }, "Read Resource");
         } catch (error) {
             logger.error('Error reading resource', { uri, error: error.message });
-            throw error;
+            return formatErrorResponse(error.message, "Read Resource");
         }
     }
 
@@ -214,7 +206,7 @@ export class ResourceHandlers {
                     name: doc.name,
                     fullName: doc.fullName,
                     pageCount: doc.pages.length,
-                    colorSwatches: doc.colorSwatches.length,
+                    colorSwatches: doc.colors.length,
                     paragraphStyles: doc.paragraphStyles.length,
                     characterStyles: doc.characterStyles.length,
                     objectStyles: doc.objectStyles.length,
@@ -269,7 +261,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -298,8 +290,8 @@ export class ResourceHandlers {
                 var doc = app.activeDocument;
                 var colors = [];
                 
-                for (var i = 0; i < doc.colorSwatches.length; i++) {
-                    var color = doc.colorSwatches[i];
+                for (var i = 0; i < doc.colors.length; i++) {
+                    var color = doc.colors[i];
                     var colorInfo = {
                         name: color.name,
                         colorType: color.colorType.toString(),
@@ -315,7 +307,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -365,7 +357,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -432,7 +424,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -501,7 +493,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -530,7 +522,7 @@ export class ResourceHandlers {
                 }
                 
                 var doc = app.activeDocument;
-                var color = doc.colorSwatches.itemByName("${colorName}");
+                var color = doc.colors.itemByName("${colorName}");
                 
                 if (!color.isValid) {
                     "ERROR: Color not found: ${colorName}";
@@ -550,7 +542,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -606,7 +598,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -673,7 +665,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);
@@ -740,7 +732,7 @@ export class ResourceHandlers {
             }
         `;
 
-        const result = await executeExtendScript(script);
+        const result = await ScriptExecutor.executeInDesignScript(script);
 
         if (result.success) {
             const data = JSON.parse(result.message);

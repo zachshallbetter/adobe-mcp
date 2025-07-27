@@ -201,6 +201,24 @@ const TEST_SUITES = [
         ],
         required: false,
         category: 'content'
+    },
+    {
+        name: 'MCP Resources',
+        description: 'Tests MCP Resources for structured data access',
+        tests: [
+            'test-mcp-resources.js'
+        ],
+        required: false,
+        category: 'mcp'
+    },
+    {
+        name: 'MCP Prompts',
+        description: 'Tests MCP Prompts for template-based workflows',
+        tests: [
+            'test-mcp-prompts.js'
+        ],
+        required: false,
+        category: 'mcp'
     }
 ];
 
@@ -291,6 +309,18 @@ const HANDLER_COVERAGE = {
         tested: ['test-enhanced-functionality.js', 'test-advanced-features.js'],
         tools: [
             'execute_indesign_code', 'view_document', 'get_session_info', 'clear_session'
+        ]
+    },
+    'ResourceHandlers': {
+        tested: ['test-mcp-resources.js'],
+        tools: [
+            'list_resources', 'list_resource_templates', 'read_resource'
+        ]
+    },
+    'PromptHandlers': {
+        tested: ['test-mcp-prompts.js'],
+        tools: [
+            'list_prompts', 'get_prompt'
         ]
     }
 };

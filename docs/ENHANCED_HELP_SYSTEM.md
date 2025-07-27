@@ -7,6 +7,7 @@ The InDesign MCP Server now features a comprehensive, intelligent help system th
 ## Key Features
 
 ### 1. **Difficulty Levels**
+
 Every tool is categorized by difficulty level to help users understand complexity:
 
 - 🟢 **Beginner**: Basic tools for getting started
@@ -17,6 +18,7 @@ Every tool is categorized by difficulty level to help users understand complexit
   - `create_master_spread`, `apply_master_spread`, `execute_indesign_code`
 
 ### 2. **Best Practices**
+
 Each tool includes specific best practices and tips:
 
 ```javascript
@@ -28,6 +30,7 @@ Each tool includes specific best practices and tips:
 ```
 
 ### 3. **Related Tools**
+
 Smart suggestions for related tools to enhance workflows:
 
 ```javascript
@@ -38,16 +41,19 @@ Smart suggestions for related tools to enhance workflows:
 ```
 
 ### 4. **Troubleshooting Guides**
+
 Comprehensive solutions for common issues:
 
-#### Available Troubleshooting Topics:
+#### Available Troubleshooting Topics
+
 - **colors-not-appearing**: Colors appearing black or incorrect
 - **fonts-not-loading**: Fonts not applying correctly
 - **images-not-placing**: Image placement issues
 - **document-not-saving**: Document save problems
 - **workflow-tools-failing**: Workflow tool issues
 
-#### Example Troubleshooting Response:
+#### Example Troubleshooting Response
+
 ```markdown
 # Colors Not Appearing Correctly
 
@@ -62,14 +68,17 @@ Comprehensive solutions for common issues:
 ```
 
 ### 5. **Scenario-Based Workflows**
+
 Complete step-by-step workflows for common tasks:
 
-#### Available Scenarios:
+#### Available Scenarios
+
 - **create-newsletter**: Professional newsletter creation
 - **design-brochure**: Marketing brochure design
 - **create-catalog**: Product catalog creation
 
-#### Example Scenario Response:
+#### Example Scenario Response
+
 ```markdown
 # Creating a Newsletter
 
@@ -91,9 +100,11 @@ await tools.call("create_publication_document", {
 ```
 
 ### Step 2: Set up brand colors and typography
+
 **Tool:** `setup_document_styles`
 
 **Example:**
+
 ```javascript
 await tools.call("setup_document_styles", {
   "documentName": "Company Newsletter",
@@ -101,6 +112,7 @@ await tools.call("setup_document_styles", {
   "styleSystem": "hierarchical"
 });
 ```
+
 ```
 
 ### 6. **Enhanced Tool Definitions**
@@ -127,6 +139,7 @@ Updated tool definitions with new parameters:
 ## Usage Examples
 
 ### Basic Help Commands
+
 ```javascript
 // General help overview
 await tools.call("help", {});
@@ -142,6 +155,7 @@ await tools.call("help", { tool: "create_text_frame", format: "examples" });
 ```
 
 ### Advanced Help Commands
+
 ```javascript
 // Troubleshooting help
 await tools.call("help", { troubleshooting: "colors-not-appearing" });
@@ -176,6 +190,7 @@ await tools.call("help", { tool: "create_master_spread", level: "expert" });
 ### Data Structures
 
 #### Tool Categories
+
 ```javascript
 static toolCategories = {
   workflow: {
@@ -188,6 +203,7 @@ static toolCategories = {
 ```
 
 #### Difficulty Levels
+
 ```javascript
 static toolDifficulties = {
   'create_document': 'beginner',
@@ -198,6 +214,7 @@ static toolDifficulties = {
 ```
 
 #### Best Practices
+
 ```javascript
 static toolBestPractices = {
   'create_document': [
@@ -212,21 +229,25 @@ static toolBestPractices = {
 ## Benefits
 
 ### For Beginners
+
 - Clear difficulty indicators help choose appropriate tools
 - Step-by-step scenarios provide complete workflows
 - Troubleshooting guides solve common problems quickly
 
 ### For Intermediate Users
+
 - Best practices improve efficiency and quality
 - Related tools suggest workflow enhancements
 - Detailed examples show advanced usage
 
 ### For Experts
+
 - Expert-level tools clearly identified
 - Complex workflow scenarios available
 - Advanced troubleshooting for edge cases
 
 ### For All Users
+
 - Comprehensive documentation in one place
 - Multiple help formats (summary, detailed, examples)
 - Contextual guidance based on experience level
@@ -239,6 +260,7 @@ The enhanced help system is thoroughly tested with comprehensive test suites:
 - **Enhanced Help System Test** (`tests/test-enhanced-help-system.js`)
 
 Test coverage includes:
+
 - All help formats and parameters
 - Difficulty level display
 - Best practices inclusion
@@ -250,6 +272,7 @@ Test coverage includes:
 ## Future Enhancements
 
 Potential future improvements:
+
 - Interactive help with real-time suggestions
 - Video tutorials and visual examples
 - Community-contributed best practices
@@ -259,4 +282,4 @@ Potential future improvements:
 
 ## Conclusion
 
-The enhanced help system transforms the InDesign MCP Server from a basic automation tool into an intelligent, user-friendly platform that guides users through complex workflows while providing comprehensive support for troubleshooting and best practices. This makes InDesign automation accessible to users of all experience levels while maintaining the power and flexibility needed for advanced workflows. 
+The enhanced help system transforms the InDesign MCP Server from a basic automation tool into an intelligent, user-friendly platform that guides users through complex workflows while providing comprehensive support for troubleshooting and best practices. This makes InDesign automation accessible to users of all experience levels while maintaining the power and flexibility needed for advanced workflows.
