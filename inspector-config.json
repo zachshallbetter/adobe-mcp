@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "indesign": {
+      "command": "node",
+      "args": ["src/index.js"],
+      "env": {}
+    }
+  }
+} 
