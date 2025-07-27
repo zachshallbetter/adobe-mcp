@@ -17,7 +17,8 @@ import {
     PageItemHandlers,
     StyleHandlers,
     TextHandlers,
-    UtilityHandlers
+    UtilityHandlers,
+    WorkflowHandlers
 } from '../handlers/index.js';
 import { formatResponse, formatErrorResponse } from '../utils/stringUtils.js';
 
@@ -56,8 +57,21 @@ export class InDesignMCPServer {
     }
 
     async handleToolCall(name, args) {
-        // Document Management
+        // Smart Workflow Tools (NEW)
         switch (name) {
+            case 'create_publication_document': return await WorkflowHandlers.createPublicationDocument(args);
+            case 'setup_document_styles': return await WorkflowHandlers.setupDocumentStyles(args);
+            case 'create_content_section': return await WorkflowHandlers.createContentSection(args);
+            case 'add_visual_element': return await WorkflowHandlers.addVisualElement(args);
+            case 'create_layout_template': return await WorkflowHandlers.createLayoutTemplate(args);
+            case 'apply_design_system': return await WorkflowHandlers.applyDesignSystem(args);
+            case 'update_content_batch': return await WorkflowHandlers.updateContentBatch(args);
+            case 'create_data_table': return await WorkflowHandlers.createDataTable(args);
+            case 'publish_document': return await WorkflowHandlers.publishDocument(args);
+            case 'get_workflow_help': return await WorkflowHandlers.getWorkflowHelp(args);
+            case 'apply_template': return await WorkflowHandlers.applyTemplate(args);
+
+            // Document Management
             case 'get_document_info': return await DocumentHandlers.getDocumentInfo();
             case 'create_document': return await DocumentHandlers.createDocument(args);
             case 'open_document': return await DocumentHandlers.openDocument(args);

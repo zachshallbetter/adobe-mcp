@@ -27,6 +27,9 @@ export { ExportHandlers } from './exportHandlers.js';
 export { UtilityHandlers } from './utilityHandlers.js';
 export { HelpHandlers } from './helpHandlers.js';
 
+// Smart Workflow Tools
+export { WorkflowHandlers } from './workflowHandlers.js';
+
 /**
  * Handler Categories Overview:
  * 

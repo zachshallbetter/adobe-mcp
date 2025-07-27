@@ -315,34 +315,102 @@ export class StyleHandlers {
         const {
             name,
             colorType = 'PROCESS',
+            // RGB format
             red,
             green,
-            blue
+            blue,
+            // CMYK format
+            cyan,
+            magenta,
+            yellow,
+            black,
+            // Hex format
+            hex,
+            // Direct color value
+            colorValue
         } = args;
 
         const escapedName = escapeJsxString(name);
 
-        // Convert RGB to CMYK using proper formula
-        const r = red / 255;
-        const g = green / 255;
-        const b = blue / 255;
+        let cyanValue, magentaValue, yellowValue, blackValue;
+        let sourceFormat = '';
 
-        // Find the maximum value
-        const max = Math.max(r, g, b);
+        // Determine which color format is being used and convert to CMYK
+        if (hex) {
+            // Convert hex to RGB, then to CMYK
+            const hexClean = hex.replace('#', '');
+            const r = parseInt(hexClean.substr(0, 2), 16);
+            const g = parseInt(hexClean.substr(2, 2), 16);
+            const b = parseInt(hexClean.substr(4, 2), 16);
 
-        // Calculate K (black)
-        const k = 1 - max;
+            const rgb = r / 255;
+            const rgbG = g / 255;
+            const rgbB = b / 255;
+            const max = Math.max(rgb, rgbG, rgbB);
+            const k = 1 - max;
+            const c = max === 0 ? 0 : (max - rgb) / max;
+            const m = max === 0 ? 0 : (max - rgbG) / max;
+            const y = max === 0 ? 0 : (max - rgbB) / max;
 
-        // Calculate CMY values
-        const c = max === 0 ? 0 : (max - r) / max;
-        const m = max === 0 ? 0 : (max - g) / max;
-        const y = max === 0 ? 0 : (max - b) / max;
+            cyanValue = Math.round(c * 100);
+            magentaValue = Math.round(m * 100);
+            yellowValue = Math.round(y * 100);
+            blackValue = Math.round(k * 100);
+            sourceFormat = `hex ${hex}`;
+        } else if (cyan !== undefined && magenta !== undefined && yellow !== undefined && black !== undefined) {
+            // Direct CMYK values
+            cyanValue = Math.round(cyan);
+            magentaValue = Math.round(magenta);
+            yellowValue = Math.round(yellow);
+            blackValue = Math.round(black);
+            sourceFormat = `CMYK [${cyan}, ${magenta}, ${yellow}, ${black}]`;
+        } else if (red !== undefined && green !== undefined && blue !== undefined) {
+            // RGB format - convert to CMYK
+            const r = red / 255;
+            const g = green / 255;
+            const b = blue / 255;
+            const max = Math.max(r, g, b);
+            const k = 1 - max;
+            const c = max === 0 ? 0 : (max - r) / max;
+            const m = max === 0 ? 0 : (max - g) / max;
+            const y = max === 0 ? 0 : (max - b) / max;
 
-        // Convert to percentages and round
-        const cyan = Math.round(c * 100);
-        const magenta = Math.round(m * 100);
-        const yellow = Math.round(y * 100);
-        const black = Math.round(k * 100);
+            cyanValue = Math.round(c * 100);
+            magentaValue = Math.round(m * 100);
+            yellowValue = Math.round(y * 100);
+            blackValue = Math.round(k * 100);
+            sourceFormat = `RGB [${red}, ${green}, ${blue}]`;
+        } else if (colorValue && Array.isArray(colorValue)) {
+            // Direct color value array (CMYK or RGB)
+            if (colorValue.length === 4) {
+                // CMYK array
+                cyanValue = Math.round(colorValue[0]);
+                magentaValue = Math.round(colorValue[1]);
+                yellowValue = Math.round(colorValue[2]);
+                blackValue = Math.round(colorValue[3]);
+                sourceFormat = `CMYK array [${colorValue.join(', ')}]`;
+            } else if (colorValue.length === 3) {
+                // RGB array - convert to CMYK
+                const r = colorValue[0] / 255;
+                const g = colorValue[1] / 255;
+                const b = colorValue[2] / 255;
+                const max = Math.max(r, g, b);
+                const k = 1 - max;
+                const c = max === 0 ? 0 : (max - r) / max;
+                const m = max === 0 ? 0 : (max - g) / max;
+                const y = max === 0 ? 0 : (max - b) / max;
+
+                cyanValue = Math.round(c * 100);
+                magentaValue = Math.round(m * 100);
+                yellowValue = Math.round(y * 100);
+                blackValue = Math.round(k * 100);
+                sourceFormat = `RGB array [${colorValue.join(', ')}]`;
+            } else {
+                throw new Error('Invalid colorValue array length. Expected 3 (RGB) or 4 (CMYK) values.');
+            }
+        } else {
+            throw new Error('No valid color format provided. Use hex, RGB (red/green/blue), CMYK (cyan/magenta/yellow/black), or colorValue array.');
+        }
 
         const script = [
             'if (app.documents.length === 0) {',
@@ -354,12 +422,12 @@ export class StyleHandlers {
             `    var color = doc.colors.add({name: "${escapedName}"});`,
             '',
             '    // Set CMYK values directly (InDesign defaults to process color)',
-            `    color.colorValue = [${cyan}, ${magenta}, ${yellow}, ${black}];`,
+            `    color.colorValue = [${cyanValue}, ${magentaValue}, ${yellowValue}, ${blackValue}];`,
             '',
             '    // Verify the color was set correctly',
             '    var actualValues = color.colorValue;',
             '',
-            `    "Color swatch '${escapedName}' created successfully with CMYK values [" + actualValues[0] + ", " + actualValues[1] + ", " + actualValues[2] + ", " + actualValues[3] + "] (from RGB ${red}, ${green}, ${blue})";`,
+            `    "Color swatch '${escapedName}' created successfully with CMYK values [" + actualValues[0] + ", " + actualValues[1] + ", " + actualValues[2] + ", " + actualValues[3] + "] (from ${sourceFormat})";`,
             '  } catch (error) {',
             '    "Error creating color swatch: " + error.message;',
             '  }',

@@ -3,7 +3,12 @@
  * Text, graphics, styling, and content management functionality
  */
 
+import { workflowToolDefinitions } from './workflowToolDefinitions.js';
+
 export const contentToolDefinitions = [
+    // =================== WORKFLOW TOOLS (NEW) ===================
+    ...workflowToolDefinitions,
+
     // =================== TEXT MANAGEMENT ===================
     {
         name: 'create_text_frame',
@@ -115,7 +120,7 @@ export const contentToolDefinitions = [
     },
     {
         name: 'help',
-        description: 'Get help information about available tools and their usage',
+        description: 'Get comprehensive help information about available tools, troubleshooting, and workflows',
         inputSchema: {
             type: 'object',
             properties: {
@@ -127,7 +132,7 @@ export const contentToolDefinitions = [
                 category: {
                     type: 'string',
                     description: 'Category of tools to list (optional)',
-                    enum: ['document', 'page', 'text', 'graphics', 'styles', 'layout', 'export', 'all'],
+                    enum: ['workflow', 'document', 'page', 'text', 'graphics', 'styles', 'layout', 'export', 'all'],
                     default: 'all'
                 },
                 format: {
@@ -135,6 +140,24 @@ export const contentToolDefinitions = [
                     description: 'Output format',
                     enum: ['summary', 'detailed', 'examples'],
                     default: 'summary'
+                },
+                level: {
+                    type: 'string',
+                    description: 'Experience level for help content',
+                    enum: ['beginner', 'intermediate', 'expert'],
+                    default: 'intermediate'
+                },
+                troubleshooting: {
+                    type: 'string',
+                    description: 'Get troubleshooting help for specific issues',
+                    enum: ['colors-not-appearing', 'fonts-not-loading', 'images-not-placing', 'document-not-saving', 'workflow-tools-failing'],
+                    default: null
+                },
+                scenario: {
+                    type: 'string',
+                    description: 'Get scenario-based workflow help',
+                    enum: ['create-newsletter', 'design-brochure', 'create-catalog'],
+                    default: null
                 }
             },
             required: [],
@@ -300,17 +323,31 @@ export const contentToolDefinitions = [
     // =================== COLORS MANAGEMENT ===================
     {
         name: 'create_color_swatch',
-        description: 'Create a color swatch',
+        description: 'Create a color swatch with support for multiple color formats (RGB, CMYK, Hex)',
         inputSchema: {
             type: 'object',
             properties: {
                 name: { type: 'string', description: 'Swatch name' },
                 colorType: { type: 'string', enum: ['PROCESS', 'SPOT'], default: 'PROCESS' },
-                red: { type: 'number', description: 'Red value (0-255)' },
-                green: { type: 'number', description: 'Green value (0-255)' },
-                blue: { type: 'number', description: 'Blue value (0-255)' },
+                // RGB format
+                red: { type: 'number', description: 'Red value (0-255) for RGB format' },
+                green: { type: 'number', description: 'Green value (0-255) for RGB format' },
+                blue: { type: 'number', description: 'Blue value (0-255) for RGB format' },
+                // CMYK format
+                cyan: { type: 'number', description: 'Cyan value (0-100) for CMYK format' },
+                magenta: { type: 'number', description: 'Magenta value (0-100) for CMYK format' },
+                yellow: { type: 'number', description: 'Yellow value (0-100) for CMYK format' },
+                black: { type: 'number', description: 'Black value (0-100) for CMYK format' },
+                // Hex format
+                hex: { type: 'string', description: 'Hex color code (e.g., "#FF0000" or "FF0000")' },
+                // Direct color value array
+                colorValue: {
+                    type: 'array',
+                    items: { type: 'number' },
+                    description: 'Color values array: [r,g,b] for RGB or [c,m,y,k] for CMYK'
+                },
             },
-            required: ['name', 'red', 'green', 'blue'],
+            required: ['name'],
         },
     },
     {
