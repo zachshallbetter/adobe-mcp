@@ -3,114 +3,91 @@
 /**
  * Simple MCP Protocol Test
  * Tests basic MCP communication before running comprehensive tests
+ * Uses unified test runner for consistency
  */
 
-import { spawn } from 'child_process';
-
-function log(message, type = 'info') {
-    const timestamp = new Date().toISOString();
-    const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
-    console.log(`${prefix} [${timestamp}] ${message}`);
-}
-
-function sendMCPCommand(command) {
-    return new Promise((resolve, reject) => {
-        const child = spawn('node', ['src/index.js'], {
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-
-        let output = '';
-        let errorOutput = '';
-
-        child.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-
-        child.stderr.on('data', (data) => {
-            errorOutput += data.toString();
-        });
-
-        child.on('close', (code) => {
-            if (code === 0) {
-                resolve(output);
-            } else {
-                reject(new Error(`Process exited with code ${code}: ${errorOutput}`));
-            }
-        });
-
-        child.on('error', (error) => {
-            reject(error);
-        });
-
-        // Send the command
-        child.stdin.write(JSON.stringify(command) + '\n');
-        child.stdin.end();
-
-        // Timeout after 10 seconds
-        setTimeout(() => {
-            child.kill();
-            reject(new Error('Command timed out'));
-        }, 10000);
-    });
-}
+import { executeTool, getTestEnvironment } from './unified-test-runner.js';
 
 async function testMCPProtocol() {
-    log('🚀 Testing MCP Protocol Communication', 'info');
+    console.log('🔗 MCP Protocol Test Suite');
+    console.log('Testing basic MCP communication...');
 
-    try {
-        // Test 1: List tools
-        log('Testing: tools/list', 'info');
-        const listCommand = {
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'tools/list',
-            params: {}
-        };
+    // Get the shared test environment
+    const env = getTestEnvironment();
+    console.log('📋 Using shared test environment:', env);
 
-        const listResult = await sendMCPCommand(listCommand);
-        log('✅ tools/list response received', 'success');
-
-        // Parse the response
-        const listResponse = JSON.parse(listResult);
-        if (listResponse.result && listResponse.result.tools) {
-            log(`📊 Found ${listResponse.result.tools.length} tools`, 'success');
+    const tests = [
+        {
+            name: 'Get Session Info',
+            tool: 'get_session_info',
+            args: {}
+        },
+        {
+            name: 'Get Document Info',
+            tool: 'get_document_info',
+            args: {}
+        },
+        {
+            name: 'List Color Swatches',
+            tool: 'list_color_swatches',
+            args: {}
+        },
+        {
+            name: 'List Styles',
+            tool: 'list_styles',
+            args: {}
         }
+    ];
 
-        // Test 2: Call a simple tool
-        log('Testing: get_document_info', 'info');
-        const callCommand = {
-            jsonrpc: '2.0',
-            id: 2,
-            method: 'tools/call',
-            params: {
-                name: 'get_document_info',
-                arguments: {}
+    let passed = 0;
+    let failed = 0;
+
+    console.log(`\n🧪 Running ${tests.length} MCP protocol tests...`);
+
+    for (let i = 0; i < tests.length; i++) {
+        const test = tests[i];
+        const testNumber = i + 1;
+        const totalTests = tests.length;
+
+        console.log(`\n  📋 [${testNumber}/${totalTests}] Testing: ${test.name}`);
+
+        try {
+            const result = await executeTool(test.tool, test.args);
+
+            if (result.success) {
+                console.log(`    ✅ [${testNumber}/${totalTests}] ${test.name}: PASSED`);
+                const operation = result.result || result.operation || 'Success';
+                console.log(`       Result: ${operation}`);
+                passed++;
+            } else {
+                console.log(`    ❌ [${testNumber}/${totalTests}] ${test.name}: FAILED`);
+                const error = result.result || result.error || 'Unknown error';
+                console.log(`       Error: ${error}`);
+                failed++;
             }
-        };
-
-        const callResult = await sendMCPCommand(callCommand);
-        log('✅ get_document_info response received', 'success');
-
-        // Parse the response
-        const callResponse = JSON.parse(callResult);
-        if (callResponse.result && callResponse.result.content && callResponse.result.content[0]) {
-            const toolResult = JSON.parse(callResponse.result.content[0].text);
-            log(`📄 Tool result: ${toolResult.operation}`, 'success');
+        } catch (error) {
+            console.log(`    ❌ [${testNumber}/${totalTests}] ${test.name}: ERROR`);
+            console.log(`       Error: ${error.message}`);
+            failed++;
         }
+    }
 
-        log('🎉 MCP Protocol test completed successfully!', 'success');
-        return true;
+    console.log('\n📊 MCP Protocol Test Results:');
+    console.log(`✅ Passed: ${passed}`);
+    console.log(`❌ Failed: ${failed}`);
+    console.log(`📈 Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%`);
 
-    } catch (error) {
-        log(`❌ MCP Protocol test failed: ${error.message}`, 'error');
-        return false;
+    if (failed > 0) {
+        console.log('\n❌ Some MCP protocol tests failed');
+        process.exit(1);
+    } else {
+        console.log('\n✅ All MCP protocol tests passed!');
+        process.exit(0);
     }
 }
 
-// Run the test
-testMCPProtocol().then(success => {
-    process.exit(success ? 0 : 1);
-}).catch(error => {
-    log(`❌ Test failed to start: ${error.message}`, 'error');
+// Run the tests
+testMCPProtocol().catch(error => {
+    console.error('❌ MCP protocol test suite failed:', error);
     process.exit(1);
 }); 
