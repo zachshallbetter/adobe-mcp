@@ -15,56 +15,92 @@ async function runContentManagementTests() {
 
     const tests = [
         {
-            name: 'Create Text Frame with Style',
+            name: 'Create Text Frame with Display Large Style',
             tool: 'create_text_frame',
             args: {
-                content: 'This is a styled text frame using the shared environment.',
-                fontSize: 14,
-                fontName: 'Arial\\tRegular',
-                alignment: 'LEFT',
-                paragraphStyle: 'Body Text',
+                content: 'This is a display large text frame using the shared environment.',
+                fontSize: 48,
+                fontName: 'Arial\\tBold',
+                alignment: 'CENTER',
+                paragraphStyle: 'Display Large',
                 characterStyle: 'Bold'
             }
         },
         {
-            name: 'Create Rectangle with Color',
+            name: 'Create Text Frame with Body Text Style',
+            tool: 'create_text_frame',
+            args: {
+                content: 'This is a body text frame with regular styling.',
+                fontSize: 12,
+                fontName: 'Arial\\tRegular',
+                alignment: 'LEFT',
+                paragraphStyle: 'Body Text',
+                characterStyle: 'Italic'
+            }
+        },
+        {
+            name: 'Create Rectangle with Primary Blue',
             tool: 'create_rectangle',
             args: {
-                width: 80,
-                height: 40,
+                width: 100,
+                height: 60,
                 fillColor: 'Primary Blue',
                 strokeColor: 'Secondary Gray',
                 strokeWeight: 2
             }
         },
         {
-            name: 'Create Table',
+            name: 'Create Ellipse with Accent Red',
+            tool: 'create_ellipse',
+            args: {
+                width: 80,
+                height: 80,
+                fillColor: 'Accent Red',
+                strokeColor: 'Pure Black',
+                strokeWeight: 1
+            }
+        },
+        {
+            name: 'Create Table with Header',
             tool: 'create_table',
             args: {
-                rows: 4,
-                columns: 3,
-                width: 150,
-                height: 100,
+                rows: 5,
+                columns: 4,
+                width: 200,
+                height: 120,
                 headerRow: true
             }
         },
         {
-            name: 'Create Ellipse',
-            tool: 'create_ellipse',
+            name: 'Create Text Frame with Caption Style',
+            tool: 'create_text_frame',
             args: {
-                width: 60,
-                height: 60,
-                fillColor: 'Accent Red',
-                strokeColor: 'None'
+                content: 'This is a caption text frame with small italic text.',
+                fontSize: 9,
+                fontName: 'Arial\\tItalic',
+                alignment: 'CENTER',
+                paragraphStyle: 'Caption',
+                characterStyle: 'Italic'
             }
         },
         {
-            name: 'List Styles',
+            name: 'Create Rectangle with Gradient Colors',
+            tool: 'create_rectangle',
+            args: {
+                width: 120,
+                height: 40,
+                fillColor: 'Primary Blue Light',
+                strokeColor: 'Primary Blue Dark',
+                strokeWeight: 3
+            }
+        },
+        {
+            name: 'List All Styles',
             tool: 'list_styles',
             args: {}
         },
         {
-            name: 'List Color Swatches',
+            name: 'List All Color Swatches',
             tool: 'list_color_swatches',
             args: {}
         }
@@ -73,24 +109,32 @@ async function runContentManagementTests() {
     let passed = 0;
     let failed = 0;
 
-    for (const test of tests) {
-        try {
-            console.log(`\n🧪 Testing: ${test.name}`);
+    console.log(`\n🧪 Running ${tests.length} content management tests...`);
 
+    for (let i = 0; i < tests.length; i++) {
+        const test = tests[i];
+        const testNumber = i + 1;
+        const totalTests = tests.length;
+
+        console.log(`\n  📋 [${testNumber}/${totalTests}] Testing: ${test.name}`);
+
+        try {
             const result = await executeTool(test.tool, test.args);
 
             if (result.success) {
-                console.log(`✅ ${test.name}: PASSED`);
-                console.log(`   Result: ${result.result || result.operation || 'Success'}`);
+                console.log(`    ✅ [${testNumber}/${totalTests}] ${test.name}: PASSED`);
+                const operation = result.result || result.operation || 'Success';
+                console.log(`       Result: ${operation}`);
                 passed++;
             } else {
-                console.log(`❌ ${test.name}: FAILED`);
-                console.log(`   Error: ${result.result || result.error || 'Unknown error'}`);
+                console.log(`    ❌ [${testNumber}/${totalTests}] ${test.name}: FAILED`);
+                const error = result.result || result.error || 'Unknown error';
+                console.log(`       Error: ${error}`);
                 failed++;
             }
         } catch (error) {
-            console.log(`❌ ${test.name}: ERROR`);
-            console.log(`   Error: ${error.message}`);
+            console.log(`    ❌ [${testNumber}/${totalTests}] ${test.name}: ERROR`);
+            console.log(`       Error: ${error.message}`);
             failed++;
         }
     }

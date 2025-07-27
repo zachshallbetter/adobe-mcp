@@ -48,18 +48,28 @@ export class TestSetup {
         });
 
         if (result.success) {
-            // Extract document name from the result
-            const message = result.result;
+            // Extract document name from the result - handle different response formats
+            const message = result.result || result.operation || '';
+            let documentName = 'Test Environment';
+
+            // Try to extract document name from various response formats
             const match = message.match(/Document name: (.+)/);
-            this.documentName = match ? match[1] : 'Test Environment';
+            if (match) {
+                documentName = match[1];
+            } else if (message.includes('created successfully')) {
+                // If it just says "created successfully", use the default name
+                documentName = 'Test Environment';
+            }
+
+            this.documentName = documentName;
             console.log(`  ✅ Document created: ${this.documentName}`);
         } else {
-            throw new Error(`Failed to create document: ${result.result}`);
+            throw new Error(`Failed to create document: ${result.result || result.error || 'Unknown error'}`);
         }
     }
 
     /**
-     * Set up styles after document creation
+     * Set up styles after document creation with comprehensive font sizes
      */
     async setupStyles() {
         if (this.stylesCreated) {
@@ -67,20 +77,30 @@ export class TestSetup {
             return;
         }
 
-        console.log('  🎨 Setting up styles...');
+        console.log('  🎨 Setting up comprehensive styles...');
 
-        // Create paragraph styles
+        // Create paragraph styles with various font sizes
         const paragraphStyles = [
-            { name: 'Heading 1', fontName: 'Arial\\tBold', fontSize: 24, alignment: 'center' },
+            { name: 'Display Large', fontName: 'Arial\\tBold', fontSize: 48, alignment: 'center' },
+            { name: 'Display Medium', fontName: 'Arial\\tBold', fontSize: 36, alignment: 'center' },
+            { name: 'Heading 1', fontName: 'Arial\\tBold', fontSize: 24, alignment: 'left' },
             { name: 'Heading 2', fontName: 'Arial\\tBold', fontSize: 18, alignment: 'left' },
+            { name: 'Heading 3', fontName: 'Arial\\tBold', fontSize: 16, alignment: 'left' },
+            { name: 'Body Large', fontName: 'Arial\\tRegular', fontSize: 14, alignment: 'left' },
             { name: 'Body Text', fontName: 'Arial\\tRegular', fontSize: 12, alignment: 'left' },
-            { name: 'Caption', fontName: 'Arial\\tItalic', fontSize: 10, alignment: 'center' }
+            { name: 'Body Small', fontName: 'Arial\\tRegular', fontSize: 10, alignment: 'left' },
+            { name: 'Caption', fontName: 'Arial\\tItalic', fontSize: 9, alignment: 'center' },
+            { name: 'Footnote', fontName: 'Arial\\tRegular', fontSize: 8, alignment: 'left' }
         ];
 
-        for (const style of paragraphStyles) {
+        console.log('    📝 Creating paragraph styles...');
+        for (let i = 0; i < paragraphStyles.length; i++) {
+            const style = paragraphStyles[i];
             const result = await executeTool('create_paragraph_style', style);
-            if (!result.success) {
-                console.warn(`  ⚠️  Failed to create paragraph style '${style.name}': ${result.result}`);
+            if (result.success) {
+                console.log(`      ✅ ${style.name} (${style.fontSize}pt)`);
+            } else {
+                console.warn(`      ⚠️  Failed to create paragraph style '${style.name}': ${result.result}`);
             }
         }
 
@@ -88,32 +108,50 @@ export class TestSetup {
         const characterStyles = [
             { name: 'Bold', fontName: 'Arial\\tBold' },
             { name: 'Italic', fontName: 'Arial\\tItalic' },
-            { name: 'Highlight', fontName: 'Arial\\tRegular' }
+            { name: 'Bold Italic', fontName: 'Arial\\tBold Italic' },
+            { name: 'Highlight', fontName: 'Arial\\tRegular' },
+            { name: 'Small Caps', fontName: 'Arial\\tRegular' }
         ];
 
-        for (const style of characterStyles) {
+        console.log('    🔤 Creating character styles...');
+        for (let i = 0; i < characterStyles.length; i++) {
+            const style = characterStyles[i];
             const result = await executeTool('create_character_style', style);
-            if (!result.success) {
-                console.warn(`  ⚠️  Failed to create character style '${style.name}': ${result.result}`);
+            if (result.success) {
+                console.log(`      ✅ ${style.name}`);
+            } else {
+                console.warn(`      ⚠️  Failed to create character style '${style.name}': ${result.result}`);
             }
         }
 
-        // Create colors
+        // Create colors with various shades
         const colors = [
             { name: 'Primary Blue', red: 0, green: 102, blue: 204 },
+            { name: 'Primary Blue Light', red: 51, green: 153, blue: 255 },
+            { name: 'Primary Blue Dark', red: 0, green: 51, blue: 102 },
             { name: 'Secondary Gray', red: 128, green: 128, blue: 128 },
-            { name: 'Accent Red', red: 204, green: 0, blue: 0 }
+            { name: 'Secondary Gray Light', red: 192, green: 192, blue: 192 },
+            { name: 'Secondary Gray Dark', red: 64, green: 64, blue: 64 },
+            { name: 'Accent Red', red: 204, green: 0, blue: 0 },
+            { name: 'Accent Green', red: 0, green: 153, blue: 0 },
+            { name: 'Accent Orange', red: 255, green: 153, blue: 0 },
+            { name: 'Pure Black', red: 0, green: 0, blue: 0 },
+            { name: 'Pure White', red: 255, green: 255, blue: 255 }
         ];
 
-        for (const color of colors) {
+        console.log('    🎨 Creating color swatches...');
+        for (let i = 0; i < colors.length; i++) {
+            const color = colors[i];
             const result = await executeTool('create_color_swatch', color);
-            if (!result.success) {
-                console.warn(`  ⚠️  Failed to create color '${color.name}': ${result.result}`);
+            if (result.success) {
+                console.log(`      ✅ ${color.name}`);
+            } else {
+                console.warn(`      ⚠️  Failed to create color '${color.name}': ${result.result}`);
             }
         }
 
         this.stylesCreated = true;
-        console.log('  ✅ Styles setup completed');
+        console.log('  ✅ Comprehensive styles setup completed');
     }
 
     /**

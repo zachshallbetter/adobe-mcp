@@ -25,7 +25,7 @@ export class ScriptExecutor {
     }
 
     /**
-     * Execute InDesign script via AppleScript
+     * Execute InDesign script via AppleScript (background mode)
      * @param {string} script - The ExtendScript to execute
      * @returns {string} The result of the script execution
      */
@@ -35,10 +35,10 @@ export class ScriptExecutor {
             const tempScriptPath = path.join(__dirname, '../../temp_script.jsx');
             fs.writeFileSync(tempScriptPath, script);
 
-            // Execute via AppleScript with persistent session
+            // Execute via AppleScript without activating (background mode)
             const appleScript = `
         tell application "Adobe InDesign 2025"
-          activate
+          -- Don't activate, keep in background
           do script POSIX file "${tempScriptPath}" language javascript
         end tell
       `;

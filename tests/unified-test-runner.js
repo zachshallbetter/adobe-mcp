@@ -113,7 +113,7 @@ export async function executeTool(toolName, args = {}) {
 }
 
 /**
- * Run a test suite with the provided environment info
+ * Run a test suite with the provided environment info and detailed progress
  */
 export async function runTestSuite(testFiles, environmentInfo = {}) {
     const results = {
@@ -123,18 +123,33 @@ export async function runTestSuite(testFiles, environmentInfo = {}) {
         failed: 0
     };
 
-    for (const testFile of testFiles) {
+    console.log(`  🧪 Running ${testFiles.length} test files...`);
+
+    for (let i = 0; i < testFiles.length; i++) {
+        const testFile = testFiles[i];
+        const testNumber = i + 1;
+        const totalTests = testFiles.length;
+
+        console.log(`    📋 [${testNumber}/${totalTests}] Running: ${testFile}`);
+
         try {
             const result = await runTestFile(testFile, environmentInfo);
             results.tests.push(result);
 
             if (result.success) {
+                console.log(`    ✅ [${testNumber}/${totalTests}] ${testFile}: PASSED`);
                 results.passed++;
             } else {
+                console.log(`    ❌ [${testNumber}/${totalTests}] ${testFile}: FAILED`);
+                if (result.errorOutput) {
+                    console.log(`       Error: ${result.errorOutput.trim()}`);
+                }
                 results.failed++;
                 results.success = false;
             }
         } catch (error) {
+            console.log(`    ❌ [${testNumber}/${totalTests}] ${testFile}: ERROR`);
+            console.log(`       Error: ${error.message}`);
             results.tests.push({
                 file: testFile,
                 success: false,
@@ -145,9 +160,13 @@ export async function runTestSuite(testFiles, environmentInfo = {}) {
         }
 
         // Add delay between tests
-        await delay(TEST_CONFIG.delay);
+        if (i < testFiles.length - 1) {
+            console.log(`    ⏳ Waiting ${TEST_CONFIG.delay}ms before next test...`);
+            await delay(TEST_CONFIG.delay);
+        }
     }
 
+    console.log(`  📊 Test suite results: ${results.passed} passed, ${results.failed} failed`);
     return results;
 }
 

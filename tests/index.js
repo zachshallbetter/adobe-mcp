@@ -244,19 +244,32 @@ async function runMasterTestSuite() {
         const progressBar = '█'.repeat(Math.floor(progress / 2)) + '░'.repeat(50 - Math.floor(progress / 2));
         console.log(`[${progressBar}] ${progress}% (${i + 1}/${suitesToRun.length}) Running: ${suiteName} [${((Date.now() - startTime) / 1000).toFixed(1)}s]`);
 
+        const suiteStartTime = Date.now();
+
         try {
             const result = await runTestSuite(suiteConfig.tests, environmentInfo);
 
+            const suiteDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
+
             if (result.success) {
-                console.log(`✅ [${timestamp}] ${suiteName}: ✅ PASSED`);
+                console.log(`✅ [${timestamp}] ${suiteName}: ✅ PASSED (${suiteDuration}s)`);
+                console.log(`   📊 Suite Results: ${result.passed} passed, ${result.failed} failed`);
                 passedTests += suiteConfig.tests.length;
             } else {
-                console.log(`❌ [${timestamp}] ${suiteName}: ❌ FAILED`);
+                console.log(`❌ [${timestamp}] ${suiteName}: ❌ FAILED (${suiteDuration}s)`);
+                console.log(`   📊 Suite Results: ${result.passed} passed, ${result.failed} failed`);
                 failedTests += suiteConfig.tests.length;
             }
         } catch (error) {
-            console.log(`❌ [${timestamp}] ${suiteName}: ❌ ERROR - ${error.message}`);
+            const suiteDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
+            console.log(`❌ [${timestamp}] ${suiteName}: ❌ ERROR (${suiteDuration}s) - ${error.message}`);
             failedTests += suiteConfig.tests.length;
+        }
+
+        // Add a small delay between test suites for better readability
+        if (i < suitesToRun.length - 1) {
+            console.log(`⏳ [${timestamp}] Waiting 1s before next test suite...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
