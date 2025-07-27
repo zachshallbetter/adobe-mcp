@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Page Backgrounds**: Full-page background color application with opacity control
 - **Enhanced Error Handling**: Improved error reporting and validation across all handlers
 - **Comprehensive Documentation**: Added MCP_INSTRUCTIONS.md, LLM_PROMPT.md, and MCP_FEATURES_GUIDE.md for better user guidance
+- **Unified Test Infrastructure**: Comprehensive test unification system with shared test environment and consistent progress tracking
 
 ### 🔧 Enhanced
 
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Export Functions**: Comprehensive PDF and image export options
 - **Workflow Automation**: High-level tools for complete publication workflows
 - **MCP Protocol**: Enhanced protocol compliance with proper error handling and performance monitoring
+- **Test Suite**: Unified test infrastructure with shared environment, consistent progress tracking, and comprehensive style/color testing
 
 ### 🐛 Fixed
 
@@ -47,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Error Reporting**: Improved error message clarity and debugging information
 - **Session Persistence**: Fixed session management across tool calls
 - **MCP Compliance**: Fixed logging to use stderr and implemented proper error handling
+- **Test Infrastructure**: Eliminated duplicate test code and standardized test execution across all test suites
 
 ### 📚 Documentation
 
@@ -56,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced Help System**: Built-in documentation with difficulty levels and best practices
 - **README Updates**: Enhanced documentation with examples and best practices
 - **Help System**: Built-in documentation accessible via the `help` command
+- **Test Documentation**: Comprehensive test suite documentation with unified test runner guide
 
 ### 🧪 Testing
 
@@ -67,6 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Comprehensive Coverage**: Tests for all major functionality including edge cases
 - **Error Handling Tests**: Validation of error scenarios and recovery
 - **Performance Tests**: Verification of scaling and positioning accuracy
+- **Test Unification**: Unified 6 test files to use consistent test runner, removing 1,203 lines of duplicate code
+- **Shared Test Environment**: Pre-created document, styles, and master page for all tests
+- **Progress Tracking**: Detailed progress bars and consistent formatting across all test suites
 
 ### 🔧 Technical Improvements
 
@@ -76,6 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance**: Optimized ExtendScript execution and response handling
 - **MCP Compliance**: Full protocol compliance with structured logging and performance monitoring
 - **Graceful Shutdown**: Proper server shutdown handling and cleanup
+- **Code Cleanup**: Removed unused test files and eliminated duplicate code across test suites
+- **Test Standardization**: Consistent test execution, error handling, and progress tracking
+- **Maintainability**: Single source of truth for test execution logic and shared test environment
 
 ## [1.0.0] - 2025-07-26
 

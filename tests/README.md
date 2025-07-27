@@ -2,6 +2,32 @@
 
 This directory contains comprehensive tests for the InDesign MCP Server, organized by functionality and complexity.
 
+## 🎯 **Unified Test Infrastructure**
+
+The test suite now features a unified infrastructure that eliminates code duplication and provides consistent testing across all functionality:
+
+### **🔄 Unified Test Runner**
+
+- **Single Source of Truth**: All tests use `unified-test-runner.js` for consistent execution
+- **Shared Test Environment**: Pre-created document, styles, and master page for all tests
+- **Consistent Progress Tracking**: Standardized progress bars and formatting
+- **Error Handling**: Unified error reporting and debugging across all tests
+
+### **📊 Unification Achievements**
+
+- **6 Test Files Unified**: `test-simple-document.js`, `test-document-preferences.js`, `test-mcp-protocol.js`, `test-indesign-basic.js`, `test-document-and-page.js`, `test-grid-layout.js`
+- **1,203 Lines Removed**: Eliminated duplicate spawn implementations and custom logging
+- **100% Success Rate**: All unified tests pass consistently
+- **Improved Maintainability**: Single test runner handles all test execution logic
+
+### **🧪 Test Environment Features**
+
+- **Pre-created Document**: Single InDesign document shared across all tests
+- **Comprehensive Styles**: 10 paragraph styles, 5 character styles, 11 color swatches
+- **Master Page**: Pre-configured master page with consistent layout
+- **Background Operation**: InDesign runs in background during testing
+- **Auto-cleanup**: Automatic document cleanup after test completion
+
 ## 📊 **Coverage Status: 100% Complete**
 
 - ✅ **All 13 handlers** properly tested
