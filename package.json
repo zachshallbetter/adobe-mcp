@@ -12,7 +12,8 @@
     "test:required": "node tests/index.js --required",
     "test:content": "node tests/index.js --content",
     "test:advanced": "node tests/index.js --advanced",
-    "test:mcp": "node tests/index.js --mcp"
+    "test:mcp": "node tests/index.js --mcp",
+    "test:comprehensive": "node tests/index.js --comprehensive"
   },
   "keywords": [
     "mcp",

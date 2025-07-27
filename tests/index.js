@@ -120,6 +120,12 @@ const TEST_SUITES = {
         category: 'mcp',
         tests: ['test-mcp-prompts.js'],
         required: false
+    },
+    'Comprehensive Test': {
+        description: 'Master comprehensive test with detailed progress tracking',
+        category: 'comprehensive',
+        tests: ['test-comprehensive.js'],
+        required: false
     }
 };
 
