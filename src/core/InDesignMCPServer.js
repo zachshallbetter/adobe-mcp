@@ -15,6 +15,8 @@ import {
     MasterSpreadHandlers,
     PageHandlers,
     PageItemHandlers,
+    ResourceHandlers,
+    PromptHandlers,
     StyleHandlers,
     TextHandlers,
     UtilityHandlers,
@@ -34,6 +36,12 @@ export class InDesignMCPServer {
             {
                 capabilities: {
                     tools: {},
+                    resources: {
+                        listChanged: true
+                    },
+                    prompts: {
+                        listChanged: true
+                    }
                 },
             }
         );
@@ -42,6 +50,7 @@ export class InDesignMCPServer {
     }
 
     setupToolHandlers() {
+        // Tools handlers
         this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
             tools: allToolDefinitions,
         }));
@@ -65,6 +74,60 @@ export class InDesignMCPServer {
             } catch (error) {
                 logger.error(`Tool call failed: ${name}`, { error: error.message, args });
                 return { content: [{ type: 'text', text: `Error: ${error.message}` }] };
+            }
+        });
+
+        // Resources handlers
+        this.server.setRequestHandler('resources/list', async () => {
+            try {
+                const resources = await ResourceHandlers.listResources();
+                return { resources };
+            } catch (error) {
+                logger.error('Failed to list resources', { error: error.message });
+                throw error;
+            }
+        });
+
+        this.server.setRequestHandler('resources/templates/list', async () => {
+            try {
+                const templates = await ResourceHandlers.listResourceTemplates();
+                return { templates };
+            } catch (error) {
+                logger.error('Failed to list resource templates', { error: error.message });
+                throw error;
+            }
+        });
+
+        this.server.setRequestHandler('resources/read', async (request) => {
+            const { uri } = request.params;
+            try {
+                const resource = await ResourceHandlers.readResource(uri);
+                return { resource };
+            } catch (error) {
+                logger.error('Failed to read resource', { uri, error: error.message });
+                throw error;
+            }
+        });
+
+        // Prompts handlers
+        this.server.setRequestHandler('prompts/list', async () => {
+            try {
+                const prompts = await PromptHandlers.listPrompts();
+                return { prompts };
+            } catch (error) {
+                logger.error('Failed to list prompts', { error: error.message });
+                throw error;
+            }
+        });
+
+        this.server.setRequestHandler('prompts/get', async (request) => {
+            const { name } = request.params;
+            try {
+                const prompt = await PromptHandlers.getPrompt(name);
+                return { prompt };
+            } catch (error) {
+                logger.error('Failed to get prompt', { name, error: error.message });
+                throw error;
             }
         });
     }

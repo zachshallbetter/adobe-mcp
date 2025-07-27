@@ -30,6 +30,10 @@ export { HelpHandlers } from './helpHandlers.js';
 // Smart Workflow Tools
 export { WorkflowHandlers } from './workflowHandlers.js';
 
+// MCP Resources and Prompts
+export { ResourceHandlers } from './resourceHandlers.js';
+export { PromptHandlers } from './promptHandlers.js';
+
 /**
  * Handler Categories Overview:
  * 
