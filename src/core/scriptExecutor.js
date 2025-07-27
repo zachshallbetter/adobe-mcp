@@ -36,12 +36,9 @@ export class ScriptExecutor {
             fs.writeFileSync(tempScriptPath, script);
 
             // Execute via AppleScript without activating (background mode)
-            const appleScript = `
-        tell application "Adobe InDesign 2025"
-          -- Don't activate, keep in background
-          do script POSIX file "${tempScriptPath}" language javascript
-        end tell
-      `;
+            const appleScript = `tell application "Adobe InDesign 2025"
+  do script POSIX file "${tempScriptPath}" language javascript
+end tell`;
 
             const result = await this.executeAppleScript(appleScript);
 
