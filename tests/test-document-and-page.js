@@ -3,159 +3,104 @@
 /**
  * Document and Page Test
  * Creates a document, then adds a page
+ * Uses unified test runner for consistency
  */
 
-import { spawn } from 'child_process';
-
-function log(message, type = 'info') {
-    const timestamp = new Date().toISOString();
-    const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
-    console.log(`${prefix} [${timestamp}] ${message}`);
-}
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function sendCommand(command) {
-    return new Promise((resolve, reject) => {
-        const child = spawn('node', ['src/index.js'], {
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-
-        let output = '';
-        let errorOutput = '';
-
-        child.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-
-        child.stderr.on('data', (data) => {
-            errorOutput += data.toString();
-        });
-
-        child.on('close', (code) => {
-            if (code === 0) {
-                resolve(output);
-            } else {
-                reject(new Error(`Process exited with code ${code}: ${errorOutput}`));
-            }
-        });
-
-        child.on('error', (error) => {
-            reject(error);
-        });
-
-        // Send the command
-        child.stdin.write(JSON.stringify(command) + '\n');
-        child.stdin.end();
-
-        // Timeout after 10 seconds
-        setTimeout(() => {
-            child.kill();
-            reject(new Error('Command timed out'));
-        }, 10000);
-    });
-}
-
-async function testTool(toolName, args = {}) {
-    try {
-        log(`Testing: ${toolName}`, 'info');
-
-        const command = {
-            jsonrpc: '2.0',
-            id: Date.now(),
-            method: 'tools/call',
-            params: {
-                name: toolName,
-                arguments: args
-            }
-        };
-
-        const result = await sendCommand(command);
-        const response = JSON.parse(result);
-
-        if (response.result && response.result.content && response.result.content[0]) {
-            const toolResult = JSON.parse(response.result.content[0].text);
-
-            if (toolResult.success) {
-                log(`✅ ${toolName}: ${toolResult.operation} completed successfully`, 'success');
-                return true;
-            } else {
-                log(`❌ ${toolName}: ${toolResult.result}`, 'error');
-                return false;
-            }
-        } else {
-            log(`❌ ${toolName}: Invalid response format`, 'error');
-            return false;
-        }
-
-    } catch (error) {
-        log(`❌ ${toolName}: ${error.message}`, 'error');
-        return false;
-    }
-}
+import { executeTool, getTestEnvironment } from './unified-test-runner.js';
 
 async function testDocumentAndPage() {
-    log('🚀 Testing Document and Page Creation', 'info');
+    console.log('📄 Document and Page Test Suite');
+    console.log('Testing document creation and page management...');
 
-    try {
-        // Step 1: Create Document
-        log('=== STEP 1: Create Document ===', 'info');
-        const documentCreated = await testTool('create_document', {
-            width: 210,
-            height: 297,
-            pages: 1,
-            facingPages: false,
-            pageOrientation: 'PORTRAIT'
-        });
+    // Get the shared test environment
+    const env = getTestEnvironment();
+    console.log('📋 Using shared test environment:', env);
 
-        if (!documentCreated) {
-            log('❌ Document creation failed - cannot continue', 'error');
-            return false;
+    const tests = [
+        {
+            name: 'Get Document Info',
+            tool: 'get_document_info',
+            args: {}
+        },
+        {
+            name: 'Get Page Info',
+            tool: 'get_page_info',
+            args: {
+                pageIndex: 0
+            }
+        },
+        {
+            name: 'Add Page',
+            tool: 'add_page',
+            args: {
+                afterPage: 0
+            }
+        },
+        {
+            name: 'Navigate to New Page',
+            tool: 'navigate_to_page',
+            args: {
+                pageIndex: 1
+            }
+        },
+        {
+            name: 'Get Updated Page Info',
+            tool: 'get_page_info',
+            args: {
+                pageIndex: 1
+            }
         }
+    ];
 
-        await delay(2000); // Wait for document to be ready
+    let passed = 0;
+    let failed = 0;
 
-        // Step 2: Add a Page
-        log('=== STEP 2: Add Page ===', 'info');
-        const pageAdded = await testTool('add_page', { position: 'AT_END' });
+    console.log(`\n🧪 Running ${tests.length} document and page tests...`);
 
-        if (!pageAdded) {
-            log('❌ Page addition failed', 'error');
-            return false;
+    for (let i = 0; i < tests.length; i++) {
+        const test = tests[i];
+        const testNumber = i + 1;
+        const totalTests = tests.length;
+
+        console.log(`\n  📋 [${testNumber}/${totalTests}] Testing: ${test.name}`);
+
+        try {
+            const result = await executeTool(test.tool, test.args);
+
+            if (result.success) {
+                console.log(`    ✅ [${testNumber}/${totalTests}] ${test.name}: PASSED`);
+                const operation = result.result || result.operation || 'Success';
+                console.log(`       Result: ${operation}`);
+                passed++;
+            } else {
+                console.log(`    ❌ [${testNumber}/${totalTests}] ${test.name}: FAILED`);
+                const error = result.result || result.error || 'Unknown error';
+                console.log(`       Error: ${error}`);
+                failed++;
+            }
+        } catch (error) {
+            console.log(`    ❌ [${testNumber}/${totalTests}] ${test.name}: ERROR`);
+            console.log(`       Error: ${error.message}`);
+            failed++;
         }
+    }
 
-        await delay(2000); // Wait for page to be added
+    console.log('\n📊 Document and Page Test Results:');
+    console.log(`✅ Passed: ${passed}`);
+    console.log(`❌ Failed: ${failed}`);
+    console.log(`📈 Success Rate: ${((passed / (passed + failed)) * 100).toFixed(1)}%`);
 
-        // Step 3: Navigate to the new page
-        log('=== STEP 3: Navigate to New Page ===', 'info');
-        const navigationSuccess = await testTool('navigate_to_page', { pageIndex: 1 });
-
-        if (!navigationSuccess) {
-            log('❌ Page navigation failed', 'error');
-            return false;
-        }
-
-        log('🎉 Document and page test completed successfully!', 'success');
-        return true;
-
-    } catch (error) {
-        log(`❌ Test failed: ${error.message}`, 'error');
-        return false;
+    if (failed > 0) {
+        console.log('\n❌ Some document and page tests failed');
+        process.exit(1);
+    } else {
+        console.log('\n✅ All document and page tests passed!');
+        process.exit(0);
     }
 }
 
-// Run the test
-testDocumentAndPage().then(success => {
-    if (success) {
-        log('🎉 Document and page test passed!', 'success');
-        process.exit(0);
-    } else {
-        log('❌ Document and page test failed!', 'error');
-        process.exit(1);
-    }
-}).catch(error => {
-    log(`❌ Test failed to start: ${error.message}`, 'error');
+// Run the tests
+testDocumentAndPage().catch(error => {
+    console.error('❌ Document and page test suite failed:', error);
     process.exit(1);
 }); 
