@@ -21,6 +21,8 @@ import {
     WorkflowHandlers
 } from '../handlers/index.js';
 import { formatResponse, formatErrorResponse } from '../utils/stringUtils.js';
+import { logger, logToolCall } from '../utils/logger.js';
+import { executeToolSafely, performanceMonitor, setupGracefulShutdown } from '../utils/debugUtils.js';
 
 export class InDesignMCPServer {
     constructor() {
@@ -48,15 +50,28 @@ export class InDesignMCPServer {
             const { name, arguments: args } = request.params;
 
             try {
+                // Start performance monitoring
+                performanceMonitor.startTimer(name);
+
                 const result = await this.handleToolCall(name, args);
+
+                // End performance monitoring
+                performanceMonitor.endTimer(name);
+
+                // Log tool execution
+                logToolCall(name, args, result);
+
                 return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
             } catch (error) {
+                logger.error(`Tool call failed: ${name}`, { error: error.message, args });
                 return { content: [{ type: 'text', text: `Error: ${error.message}` }] };
             }
         });
     }
 
     async handleToolCall(name, args) {
+        logger.debug(`Handling tool call: ${name}`, { args });
+
         // Smart Workflow Tools (NEW)
         switch (name) {
             case 'create_publication_document': return await WorkflowHandlers.createPublicationDocument(args);
@@ -247,7 +262,15 @@ export class InDesignMCPServer {
     async run() {
         const transport = new StdioServerTransport();
         await this.server.connect(transport);
-        // Don't log to stdout as it interferes with MCP protocol
-        // console.log('InDesign MCP Server started');
+
+        // Setup graceful shutdown
+        setupGracefulShutdown(this.server);
+
+        // Log server start to stderr (MCP-compliant)
+        logger.info('InDesign MCP Server started', {
+            version: '1.1.0',
+            transport: 'stdio',
+            tools: Object.keys(allToolDefinitions).length
+        });
     }
 } 
