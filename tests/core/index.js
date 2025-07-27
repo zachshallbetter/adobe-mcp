@@ -3,7 +3,7 @@
  * Runs all test suites with proper setup and teardown
  */
 import { testSetup } from './test-setup.js';
-import { runTestSuite } from './unified-test-runner.js';
+import { runTestSuite, initializeServer, shutdownServer } from './unified-test-runner.js';
 
 // Test suite definitions with categories and descriptions
 const TEST_SUITES = {
@@ -219,86 +219,100 @@ async function runMasterTestSuite() {
 
     console.log(`ℹ️ [${timestamp}] Running ${suitesToRun.length} test suites`);
 
-    // Initialize test environment once
-    console.log(`📋 [${timestamp}] Initializing shared test environment...`);
-    const setupSuccess = await testSetup.initialize();
+    try {
+        // Initialize global server process
+        console.log(`📋 [${timestamp}] Initializing global server process...`);
+        await initializeServer();
 
-    if (!setupSuccess) {
-        console.error(`❌ [${timestamp}] Failed to initialize test environment. Aborting tests.`);
-        process.exit(1);
-    }
+        // Initialize test environment once
+        console.log(`📋 [${timestamp}] Initializing shared test environment...`);
+        const setupSuccess = await testSetup.initialize();
 
-    const environmentInfo = testSetup.getEnvironmentInfo();
-    console.log(`ℹ️ [${timestamp}] Test environment ready:`, environmentInfo);
+        if (!setupSuccess) {
+            console.error(`❌ [${timestamp}] Failed to initialize test environment. Aborting tests.`);
+            await shutdownServer();
+            process.exit(1);
+        }
 
-    let passedTests = 0;
-    let failedTests = 0;
-    let totalTests = 0;
+        const environmentInfo = testSetup.getEnvironmentInfo();
+        console.log(`ℹ️ [${timestamp}] Test environment ready:`, environmentInfo);
 
-    // Run each test suite
-    for (let i = 0; i < suitesToRun.length; i++) {
-        const [suiteName, suiteConfig] = suitesToRun[i];
-        totalTests += suiteConfig.tests.length;
+        let passedTests = 0;
+        let failedTests = 0;
+        let totalTests = 0;
 
-        console.log(`📋 [${timestamp}] \n${suiteName}`);
-        console.log(`ℹ️ [${timestamp}] Description: ${suiteConfig.description}`);
-        console.log(`ℹ️ [${timestamp}] Category: ${suiteConfig.category}`);
-        console.log(`ℹ️ [${timestamp}] Tests: ${suiteConfig.tests.join(', ')}`);
-        console.log(`ℹ️ [${timestamp}] Required: ${suiteConfig.required ? 'Yes' : 'No'}`);
+        // Run each test suite
+        for (let i = 0; i < suitesToRun.length; i++) {
+            const [suiteName, suiteConfig] = suitesToRun[i];
+            totalTests += suiteConfig.tests.length;
 
-        const progress = ((i + 1) / suitesToRun.length * 100).toFixed(1);
-        const progressBar = '█'.repeat(Math.floor(progress / 2)) + '░'.repeat(50 - Math.floor(progress / 2));
-        console.log(`[${progressBar}] ${progress}% (${i + 1}/${suitesToRun.length}) Running: ${suiteName} [${((Date.now() - startTime) / 1000).toFixed(1)}s]`);
+            console.log(`📋 [${timestamp}] \n${suiteName}`);
+            console.log(`ℹ️ [${timestamp}] Description: ${suiteConfig.description}`);
+            console.log(`ℹ️ [${timestamp}] Category: ${suiteConfig.category}`);
+            console.log(`ℹ️ [${timestamp}] Tests: ${suiteConfig.tests.join(', ')}`);
+            console.log(`ℹ️ [${timestamp}] Required: ${suiteConfig.required ? 'Yes' : 'No'}`);
 
-        const suiteStartTime = Date.now();
+            const progress = ((i + 1) / suitesToRun.length * 100).toFixed(1);
+            const progressBar = '█'.repeat(Math.floor(progress / 2)) + '░'.repeat(50 - Math.floor(progress / 2));
+            console.log(`[${progressBar}] ${progress}% (${i + 1}/${suitesToRun.length}) Running: ${suiteName} [${((Date.now() - startTime) / 1000).toFixed(1)}s]`);
 
-        try {
-            const result = await runTestSuite(suiteConfig.tests, environmentInfo);
+            const suiteStartTime = Date.now();
 
-            const suiteDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
+            try {
+                const result = await runTestSuite(suiteConfig.tests, environmentInfo);
 
-            if (result.success) {
-                console.log(`✅ [${timestamp}] ${suiteName}: ✅ PASSED (${suiteDuration}s)`);
-                console.log(`   📊 Suite Results: ${result.passed} passed, ${result.failed} failed`);
-                passedTests += suiteConfig.tests.length;
-            } else {
-                console.log(`❌ [${timestamp}] ${suiteName}: ❌ FAILED (${suiteDuration}s)`);
-                console.log(`   📊 Suite Results: ${result.passed} passed, ${result.failed} failed`);
+                const suiteDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
+
+                if (result.success) {
+                    console.log(`✅ [${timestamp}] ${suiteName}: ✅ PASSED (${suiteDuration}s)`);
+                    console.log(`   📊 Suite Results: ${result.passed} passed, ${result.failed} failed`);
+                    passedTests += suiteConfig.tests.length;
+                } else {
+                    console.log(`❌ [${timestamp}] ${suiteName}: ❌ FAILED (${suiteDuration}s)`);
+                    console.log(`   📊 Suite Results: ${result.passed} passed, ${result.failed} failed`);
+                    failedTests += suiteConfig.tests.length;
+                }
+            } catch (error) {
+                const suiteDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
+                console.log(`❌ [${timestamp}] ${suiteName}: ❌ ERROR (${suiteDuration}s) - ${error.message}`);
                 failedTests += suiteConfig.tests.length;
             }
-        } catch (error) {
-            const suiteDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
-            console.log(`❌ [${timestamp}] ${suiteName}: ❌ ERROR (${suiteDuration}s) - ${error.message}`);
-            failedTests += suiteConfig.tests.length;
+
+            // Add a small delay between test suites for better readability
+            if (i < suitesToRun.length - 1) {
+                console.log(`⏳ [${timestamp}] Waiting 1s before next test suite...`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
         }
 
-        // Add a small delay between test suites for better readability
-        if (i < suitesToRun.length - 1) {
-            console.log(`⏳ [${timestamp}] Waiting 1s before next test suite...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // Final summary
+        const endTime = Date.now();
+        const totalTime = (endTime - startTime) / 1000;
+
+        console.log(`\n📊 [${timestamp}] Test Summary`);
+        console.log(`ℹ️ [${timestamp}] Total Time: ${totalTime.toFixed(1)}s`);
+        console.log(`ℹ️ [${timestamp}] Tests Passed: ${passedTests}`);
+        console.log(`ℹ️ [${timestamp}] Tests Failed: ${failedTests}`);
+        console.log(`ℹ️ [${timestamp}] Success Rate: ${((passedTests / (passedTests + failedTests)) * 100).toFixed(1)}%`);
+
+        // Cleanup
+        console.log(`🧹 [${timestamp}] Cleaning up test environment...`);
+        await testSetup.cleanup();
+
+        if (failedTests > 0) {
+            console.log(`\n❌ [${timestamp}] Some tests failed. Check the output above for details.`);
+            await shutdownServer();
+            process.exit(1);
+        } else {
+            console.log(`\n✅ [${timestamp}] All tests passed successfully!`);
+            await shutdownServer();
+            process.exit(0);
         }
-    }
 
-    // Final summary
-    const endTime = Date.now();
-    const totalTime = (endTime - startTime) / 1000;
-
-    console.log(`\n📊 [${timestamp}] Test Summary`);
-    console.log(`ℹ️ [${timestamp}] Total Time: ${totalTime.toFixed(1)}s`);
-    console.log(`ℹ️ [${timestamp}] Tests Passed: ${passedTests}`);
-    console.log(`ℹ️ [${timestamp}] Tests Failed: ${failedTests}`);
-    console.log(`ℹ️ [${timestamp}] Success Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%`);
-
-    // Cleanup test environment
-    console.log(`\n🧹 [${timestamp}] Cleaning up test environment...`);
-    await testSetup.cleanup();
-
-    if (failedTests > 0) {
-        console.log(`\n❌ [${timestamp}] Some tests failed. Check the output above for details.`);
+    } catch (error) {
+        console.error(`❌ [${timestamp}] Test suite failed:`, error.message);
+        await shutdownServer();
         process.exit(1);
-    } else {
-        console.log(`\n✅ [${timestamp}] All tests passed successfully!`);
-        process.exit(0);
     }
 }
 

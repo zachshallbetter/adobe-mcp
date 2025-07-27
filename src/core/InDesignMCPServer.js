@@ -1,8 +1,8 @@
 /**
  * Main InDesign MCP Server class
  */
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { allToolDefinitions } from '../types/index.js';
 import {
@@ -23,8 +23,8 @@ import {
     WorkflowHandlers
 } from '../handlers/index.js';
 import { formatResponse, formatErrorResponse } from '../utils/stringUtils.js';
-import { logger, logToolCall } from '../utils/logger.js';
-import { executeToolSafely, performanceMonitor, setupGracefulShutdown } from '../utils/debugUtils.js';
+import { logger } from '../utils/logger.js';
+import { setupGracefulShutdown, performanceMonitor, executeToolSafely, createHealthCheck } from '../utils/debugUtils.js';
 
 export class InDesignMCPServer {
     constructor() {
@@ -51,12 +51,17 @@ export class InDesignMCPServer {
 
     setupToolHandlers() {
         // Tools handlers
-        this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-            tools: allToolDefinitions,
-        }));
+        this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+            logger.debug('List tools request received');
+            return {
+                tools: Object.values(allToolDefinitions)
+            };
+        });
 
         this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
             const { name, arguments: args } = request.params;
+
+            logger.info(`Tool call received: ${name}`, { args });
 
             try {
                 // Start performance monitoring
@@ -67,13 +72,43 @@ export class InDesignMCPServer {
                 // End performance monitoring
                 performanceMonitor.endTimer(name);
 
-                // Log tool execution
-                logToolCall(name, args, result);
+                // Enhanced success logging
+                const metrics = performanceMonitor.getMetrics()[name];
+                logger.info(`Tool completed: ${name}`, {
+                    success: result.success,
+                    duration: metrics?.lastDuration,
+                    avgDuration: metrics?.avgDuration,
+                    totalCalls: metrics?.calls
+                });
 
                 return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
             } catch (error) {
-                logger.error(`Tool call failed: ${name}`, { error: error.message, args });
-                return { content: [{ type: 'text', text: `Error: ${error.message}` }] };
+                // End performance monitoring even on error
+                performanceMonitor.endTimer(name);
+
+                // Enhanced error logging
+                const metrics = performanceMonitor.getMetrics()[name];
+                logger.error(`Tool call failed: ${name}`, {
+                    error: error.message,
+                    stack: error.stack,
+                    args,
+                    duration: metrics?.lastDuration,
+                    avgDuration: metrics?.avgDuration,
+                    totalCalls: metrics?.calls
+                });
+
+                // Return structured error response
+                const errorResponse = {
+                    success: false,
+                    message: `Tool execution failed: ${error.message}`,
+                    error: {
+                        code: error.code || 'TOOL_EXECUTION_ERROR',
+                        details: error.details || {},
+                        timestamp: new Date().toISOString()
+                    }
+                };
+
+                return { content: [{ type: 'text', text: JSON.stringify(errorResponse, null, 2) }] };
             }
         });
 
@@ -275,24 +310,256 @@ export class InDesignMCPServer {
             // Help System
             case 'help': return await HelpHandlers.getHelp(args);
 
+            // Server Health Check
+            case 'health_check': return await this.handleHealthCheck();
+
+            // Server Status and Metrics
+            case 'get_server_status': return await this.handleServerStatus();
+
             // Add more handlers as we create them
             default:
                 return formatErrorResponse(`Tool '${name}' not found or not implemented. Use 'help' to see available tools.`, "Tool Call");
         }
     }
 
+    /**
+     * Handle server health check
+     */
+    async handleHealthCheck() {
+        try {
+            const healthData = createHealthCheck();
+
+            // Enhanced InDesign-specific health information
+            const indesignHealth = {
+                ...healthData,
+                indesign: {
+                    hasActiveDocument: false,
+                    documentCount: 0,
+                    applicationStatus: 'unknown',
+                    lastCheck: new Date().toISOString()
+                },
+                server: {
+                    version: '1.1.0',
+                    transport: 'stdio',
+                    tools: Object.keys(allToolDefinitions).length,
+                    uptime: process.uptime(),
+                    memory: process.memoryUsage(),
+                    performance: performanceMonitor.getMetrics()
+                }
+            };
+
+            // Try to get InDesign status if possible
+            try {
+                const sessionInfo = await UtilityHandlers.getSessionInfo();
+                if (sessionInfo.success && sessionInfo.result) {
+                    const session = JSON.parse(sessionInfo.result);
+                    indesignHealth.indesign = {
+                        hasActiveDocument: session.hasActiveDocument || false,
+                        documentCount: session.activeDocument ? 1 : 0,
+                        applicationStatus: session.hasActiveDocument ? 'active' : 'idle',
+                        lastCheck: new Date().toISOString()
+                    };
+                }
+            } catch (error) {
+                logger.warn('Could not get InDesign status for health check', { error: error.message });
+                indesignHealth.indesign.applicationStatus = 'error';
+                indesignHealth.indesign.error = error.message;
+            }
+
+            // Log health check
+            logger.info('Health check completed', {
+                status: 'healthy',
+                indesignStatus: indesignHealth.indesign.applicationStatus,
+                tools: indesignHealth.server.tools
+            });
+
+            return formatResponse('Health check completed successfully', indesignHealth);
+        } catch (error) {
+            logger.error('Health check failed', { error: error.message, stack: error.stack });
+            return formatErrorResponse('Health check failed', error.message);
+        }
+    }
+
+    /**
+     * Handle server status and metrics
+     */
+    async handleServerStatus() {
+        try {
+            const status = {
+                server: {
+                    version: '1.1.0',
+                    transport: 'stdio',
+                    uptime: process.uptime(),
+                    memory: process.memoryUsage(),
+                    platform: process.platform,
+                    arch: process.arch,
+                    nodeVersion: process.version
+                },
+                tools: {
+                    total: Object.keys(allToolDefinitions).length,
+                    categories: this.getToolCategories(),
+                    definitions: allToolDefinitions
+                },
+                performance: {
+                    metrics: performanceMonitor.getMetrics(),
+                    summary: this.getPerformanceSummary()
+                },
+                status: {
+                    timestamp: new Date().toISOString(),
+                    health: 'healthy',
+                    ready: true
+                }
+            };
+
+            logger.info('Server status requested', {
+                tools: status.tools.total,
+                uptime: status.server.uptime
+            });
+
+            return formatResponse('Server status retrieved successfully', status);
+        } catch (error) {
+            logger.error('Server status failed', { error: error.message, stack: error.stack });
+            return formatErrorResponse('Server status failed', error.message);
+        }
+    }
+
+    /**
+     * Get tool categories for status reporting
+     */
+    getToolCategories() {
+        const categories = {};
+
+        for (const tool of Object.values(allToolDefinitions)) {
+            const category = this.getToolCategory(tool.name);
+            if (!categories[category]) {
+                categories[category] = 0;
+            }
+            categories[category]++;
+        }
+
+        return categories;
+    }
+
+    /**
+     * Determine tool category based on name
+     */
+    getToolCategory(toolName) {
+        if (toolName.startsWith('create_') || toolName.startsWith('add_')) return 'creation';
+        if (toolName.startsWith('get_') || toolName.startsWith('list_')) return 'query';
+        if (toolName.startsWith('edit_') || toolName.startsWith('update_')) return 'modification';
+        if (toolName.startsWith('delete_') || toolName.startsWith('remove_')) return 'deletion';
+        if (toolName.startsWith('export_') || toolName.startsWith('package_')) return 'export';
+        if (toolName.includes('workflow') || toolName.includes('template')) return 'workflow';
+        if (toolName.includes('health') || toolName.includes('status')) return 'system';
+        return 'utility';
+    }
+
+    /**
+     * Get performance summary
+     */
+    getPerformanceSummary() {
+        const metrics = performanceMonitor.getMetrics();
+        const summary = {
+            totalCalls: 0,
+            totalDuration: 0,
+            avgDuration: 0,
+            slowestTool: null,
+            fastestTool: null,
+            mostUsedTool: null
+        };
+
+        let maxDuration = 0;
+        let minDuration = Infinity;
+        let maxCalls = 0;
+
+        for (const [toolName, metric] of Object.entries(metrics)) {
+            summary.totalCalls += metric.calls;
+            summary.totalDuration += metric.avgDuration * metric.calls;
+
+            if (metric.avgDuration > maxDuration) {
+                maxDuration = metric.avgDuration;
+                summary.slowestTool = { name: toolName, duration: metric.avgDuration };
+            }
+
+            if (metric.avgDuration < minDuration) {
+                minDuration = metric.avgDuration;
+                summary.fastestTool = { name: toolName, duration: metric.avgDuration };
+            }
+
+            if (metric.calls > maxCalls) {
+                maxCalls = metric.calls;
+                summary.mostUsedTool = { name: toolName, calls: metric.calls };
+            }
+        }
+
+        if (summary.totalCalls > 0) {
+            summary.avgDuration = summary.totalDuration / summary.totalCalls;
+        }
+
+        return summary;
+    }
+
     async run() {
-        const transport = new StdioServerTransport();
-        await this.server.connect(transport);
+        try {
+            console.log('🚀 Starting InDesign MCP Server...');
 
-        // Setup graceful shutdown
-        setupGracefulShutdown(this.server);
+            const transport = new StdioServerTransport();
+            await this.server.connect(transport);
 
-        // Log server start to stderr (MCP-compliant)
-        logger.info('InDesign MCP Server started', {
-            version: '1.1.0',
-            transport: 'stdio',
-            tools: Object.keys(allToolDefinitions).length
-        });
+            // Setup graceful shutdown
+            setupGracefulShutdown(this.server);
+
+            // Enhanced startup logging
+            const startupInfo = {
+                version: '1.1.0',
+                transport: 'stdio',
+                tools: Object.keys(allToolDefinitions).length,
+                timestamp: new Date().toISOString(),
+                status: 'ready'
+            };
+
+            // Log server start to stderr (MCP-compliant)
+            logger.info('InDesign MCP Server started', startupInfo);
+
+            // Enhanced startup confirmation for external processes
+            console.error(JSON.stringify({
+                timestamp: new Date().toISOString(),
+                level: 'INFO',
+                message: 'InDesign MCP Server started',
+                data: startupInfo
+            }));
+
+            // Additional startup confirmation for test infrastructure
+            console.log('✅ InDesign MCP Server ready for connections');
+
+            // Emit ready signal for external processes
+            console.error(JSON.stringify({
+                timestamp: new Date().toISOString(),
+                level: 'INFO',
+                message: 'Server ready',
+                data: { status: 'ready', transport: 'stdio' }
+            }));
+
+        } catch (error) {
+            logger.error('Failed to start InDesign MCP Server', {
+                error: error.message,
+                stack: error.stack,
+                timestamp: new Date().toISOString()
+            });
+
+            // Enhanced error logging for external processes
+            console.error(JSON.stringify({
+                timestamp: new Date().toISOString(),
+                level: 'ERROR',
+                message: 'Failed to start InDesign MCP Server',
+                data: {
+                    error: error.message,
+                    status: 'failed',
+                    transport: 'stdio'
+                }
+            }));
+
+            throw error;
+        }
     }
 } 

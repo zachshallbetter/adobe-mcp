@@ -119,51 +119,6 @@ export const contentToolDefinitions = [
         },
     },
     {
-        name: 'help',
-        description: 'Get comprehensive help information about available tools, troubleshooting, and workflows',
-        inputSchema: {
-            type: 'object',
-            properties: {
-                tool: {
-                    type: 'string',
-                    description: 'Specific tool name to get help for (optional)',
-                    default: null
-                },
-                category: {
-                    type: 'string',
-                    description: 'Category of tools to list (optional)',
-                    enum: ['workflow', 'document', 'page', 'text', 'graphics', 'styles', 'layout', 'export', 'all'],
-                    default: 'all'
-                },
-                format: {
-                    type: 'string',
-                    description: 'Output format',
-                    enum: ['summary', 'detailed', 'examples'],
-                    default: 'summary'
-                },
-                level: {
-                    type: 'string',
-                    description: 'Experience level for help content',
-                    enum: ['beginner', 'intermediate', 'expert'],
-                    default: 'intermediate'
-                },
-                troubleshooting: {
-                    type: 'string',
-                    description: 'Get troubleshooting help for specific issues',
-                    enum: ['colors-not-appearing', 'fonts-not-loading', 'images-not-placing', 'document-not-saving', 'workflow-tools-failing'],
-                    default: null
-                },
-                scenario: {
-                    type: 'string',
-                    description: 'Get scenario-based workflow help',
-                    enum: ['create-newsletter', 'design-brochure', 'create-catalog'],
-                    default: null
-                }
-            },
-            required: [],
-        },
-    },
-    {
         name: 'create_rectangle',
         description: 'Create a rectangle on the active page',
         inputSchema: {
@@ -428,6 +383,28 @@ export const contentToolDefinitions = [
                 }
             },
             required: ['name']
+        }
+    },
+
+    // =================== SERVER MANAGEMENT ===================
+    {
+        name: 'health_check',
+        title: 'Server Health Check',
+        description: 'Check the health and status of the InDesign MCP Server',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: []
+        }
+    },
+    {
+        name: 'get_server_status',
+        title: 'Get Server Status',
+        description: 'Get detailed server status, metrics, and performance information',
+        inputSchema: {
+            type: 'object',
+            properties: {},
+            required: []
         }
     }
 ]; 
