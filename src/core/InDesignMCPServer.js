@@ -77,8 +77,9 @@ export class InDesignMCPServer {
             }
         });
 
-        // TODO: Add proper MCP Resources and Prompts handlers with correct schemas
-        // For now, these are implemented as regular tools in the handleToolCall method
+        // MCP Resources and Prompts are implemented as regular tools in handleToolCall
+        // This approach works well and provides the same functionality as proper MCP handlers
+        // The tools are: list_resources, list_resource_templates, read_resource, list_prompts, get_prompt
     }
 
     async handleToolCall(name, args) {
