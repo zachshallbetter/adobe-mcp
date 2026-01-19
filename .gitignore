@@ -106,4 +106,9 @@ temp_script.jsx
 # OS generated files
 Thumbs.db
 ehthumbs.db
-Desktop.ini
+Desktop.inidist/
+build/
+.env.local
+.venv
+venv/
+tmp/
