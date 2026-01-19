@@ -4,7 +4,7 @@
  */
 import { InDesignMCPServer } from './core/InDesignMCPServer.js';
 import { performanceMonitor, createHealthCheck } from './utils/debugUtils.js';
-import { logger } from './utils/logger.js';
+import { logger, logServerStartup, logServerShutdown } from './utils/logger.js';
 
 async function main() {
     const startTime = Date.now();
@@ -14,12 +14,12 @@ async function main() {
         console.log('🚀 Initializing InDesign MCP Server...');
 
         // Log startup information
-        logger.info('Starting InDesign MCP Server', {
-            version: '1.1.0',
+        logServerStartup('1.1.0', {
             nodeVersion: process.version,
             platform: process.platform,
             arch: process.arch,
-            timestamp: new Date().toISOString()
+            fileLogging: logger.isFileLoggingEnabled(),
+            logsDir: logger.getLogsDir()
         });
 
         server = new InDesignMCPServer();
@@ -54,17 +54,11 @@ async function main() {
             // Log final metrics
             performanceMonitor.logMetrics();
 
-            // Log shutdown for external processes
-            console.error(JSON.stringify({
-                timestamp: new Date().toISOString(),
-                level: 'INFO',
-                message: 'InDesign MCP Server shutting down',
-                data: {
-                    signal,
-                    uptime: parseFloat(uptime),
-                    finalMetrics: performanceMonitor.getMetrics()
-                }
-            }));
+            // Log shutdown
+            logServerShutdown(signal, parseFloat(uptime));
+
+            // Close logger streams
+            logger.close();
 
             process.exit(0);
         };

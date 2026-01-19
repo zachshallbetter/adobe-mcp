@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const TEST_CONFIG = {
-    serverPath: join(__dirname, '../src/index.js'),
+    serverPath: join(__dirname, '../../src/index.js'),
     delay: 1000,
     timeout: 30000
 };
@@ -170,6 +170,18 @@ export async function runTestSuite(testFiles, environmentInfo = {}) {
         failed: 0
     };
 
+    // Initialize server if not already initialized
+    if (!globalServerProcess || !serverReady) {
+        try {
+            await initializeServer();
+        } catch (error) {
+            console.log(`  ❌ Failed to initialize server: ${error.message}`);
+            results.success = false;
+            results.failed = testFiles.length;
+            return results;
+        }
+    }
+
     console.log(`  🧪 Running ${testFiles.length} test files...`);
 
     for (let i = 0; i < testFiles.length; i++) {
@@ -223,7 +235,7 @@ export async function runTestSuite(testFiles, environmentInfo = {}) {
 async function runTestFile(testFile, environmentInfo = {}) {
     try {
         // Import and run the test function directly
-        const testPath = join(__dirname, testFile);
+        const testPath = join(__dirname, '..', testFile);
         const testModule = await import(testPath);
 
         // Find the main test function (usually the default export or a function named after the file)

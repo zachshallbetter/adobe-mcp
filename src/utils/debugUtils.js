@@ -4,7 +4,7 @@
  * Based on MCP documentation best practices for debugging servers
  */
 
-import { logger } from './logger.js';
+import { logger, logPerformance } from './logger.js';
 
 /**
  * Enhanced error handling for MCP tool calls
@@ -44,6 +44,7 @@ export async function executeToolSafely(toolName, args, handler) {
 
         logger.toolCall(toolName, args, result);
         logger.debug(`Tool completed: ${toolName}`, { duration, success: result.success });
+        logPerformance(`tool_${toolName}`, duration, { success: true, args });
 
         return result;
     } catch (error) {
@@ -55,6 +56,7 @@ export async function executeToolSafely(toolName, args, handler) {
             duration,
             args
         });
+        logPerformance(`tool_${toolName}`, duration, { success: false, error: error.message, args });
 
         // Return structured error response
         return {
