@@ -103,11 +103,18 @@ npm install -g adobe-mcp-suite
 
 ### Homebrew or curl
 
-On macOS or Linux, install the same suite release with Homebrew:
+On macOS or Linux, install with Homebrew from the Creative MCP tap. It installs the
+suite and links every app server (`adobe-mcp-indesign`, `adobe-mcp-illustrator`,
+`adobe-mcp-photoshop`, `adobe-mcp-premiere`, `adobe-mcp-aftereffects`) onto your `PATH`:
 
 ```bash
-brew install --formula https://raw.githubusercontent.com/zachshallbetter/adobe-mcp/main/Formula/adobe-mcp-suite.rb
+brew tap zachshallbetter/tap
+brew trust zachshallbetter/tap   # Homebrew 7+ asks you to trust third-party taps
+brew install zachshallbetter/tap/adobe-mcp
 ```
+
+`Formula/adobe-mcp-suite.rb` in this repository is deprecated. If you installed it, switch with
+`brew uninstall adobe-mcp-suite && brew install zachshallbetter/tap/adobe-mcp`.
 
 Or use the installer script, which installs the latest npm release globally:
 
