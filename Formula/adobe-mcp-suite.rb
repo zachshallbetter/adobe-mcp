@@ -5,6 +5,8 @@ class AdobeMcpSuite < Formula
   sha256 "f3c9f9cbe2954c0865f5fe801c42b989e434c5a1e52b5f5d4bb982de58efdc93"
   license "MIT"
 
+  deprecate! date: "2026-11-03", because: "has moved to `brew install zachshallbetter/tap/adobe-mcp`"
+
   depends_on "node"
 
   def install
