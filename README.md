@@ -101,6 +101,21 @@ Optional global install (puts `adobe-mcp-suite` on your `PATH`):
 npm install -g adobe-mcp-suite
 ```
 
+### Everything at once (macOS)
+
+The [`creative-mcp`](https://creativemcp.com/docs/cli.html#installer) installer finds the Adobe apps
+and MCP clients on your Mac, installs these servers with Homebrew, registers the ones that match
+your apps with each client and checks they answer. It shows the plan first and is safe to rerun:
+
+```bash
+brew tap zachshallbetter/tap
+brew trust zachshallbetter/tap
+brew install zachshallbetter/tap/creative-mcp
+creative-mcp setup
+```
+
+Later, `creative-mcp doctor` checks the servers, the running apps and each client's registrations.
+
 ### Homebrew or curl
 
 On macOS or Linux, install with Homebrew from the Creative MCP tap. It installs the
