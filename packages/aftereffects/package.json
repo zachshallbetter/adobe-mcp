@@ -1,6 +1,6 @@
 {
   "name": "adobe-mcp-aftereffects",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for Adobe After Effects: projects, compositions, layers, keyframes, expressions, effects, text, masks and rendering through ExtendScript",
   "mcpName": "io.github.zachshallbetter/adobe-mcp-aftereffects",
   "type": "module",

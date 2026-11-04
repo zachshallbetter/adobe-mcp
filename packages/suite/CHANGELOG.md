@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.0 — unreleased
+## 0.3.1 — 2026-11-03
+
+- Depend on adobe-mcp-photoshop 0.1.1, adobe-mcp-illustrator 0.9.1 and adobe-mcp-aftereffects 0.1.1, whose status tools no longer start a closed app (adobe-mcp#431).
+
+## 0.3.0 — 2026-10-21
 
 - Make the suite an MCP coordinator that exposes only cross-application workflows.
 - Delegate workflow scripts to the standalone InDesign and Illustrator servers.

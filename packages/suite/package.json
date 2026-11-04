@@ -1,6 +1,6 @@
 {
   "name": "adobe-mcp-suite",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local MCP coordinator for cross-app Adobe workflows.",
   "mcpName": "io.github.zachshallbetter/adobe-mcp-suite",
   "type": "module",
@@ -51,9 +51,9 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "adobe-mcp-core": "0.2.0",
     "adobe-mcp-indesign": "2.5.0",
-    "adobe-mcp-illustrator": "0.9.0",
-    "adobe-mcp-photoshop": "0.1.0",
-    "adobe-mcp-aftereffects": "0.1.0",
+    "adobe-mcp-illustrator": "0.9.1",
+    "adobe-mcp-photoshop": "0.1.1",
+    "adobe-mcp-aftereffects": "0.1.1",
     "adobe-mcp-premiere": "0.1.0"
   },
   "devDependencies": {
