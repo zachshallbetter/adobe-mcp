@@ -9,12 +9,16 @@ export const tools = [
     {
         name: 'aftereffects_status',
         description: 'Check that After Effects is reachable: platform, how the server addresses After Effects, whether it is running, its version and project. Use this first when a call fails to connect',
-        inputSchema: { type: 'object', properties: { probe: { type: 'boolean', description: 'Ask After Effects for its version and project (starts it if it is not running). Default true', default: true } } },
+        inputSchema: { type: 'object', properties: { probe: { type: 'boolean', description: 'Ask After Effects for its version and project. Default: only when After Effects is already running, so a status check never starts it; true starts After Effects if needed' } } },
         hints: { readOnly: true },
         features: ['aftereffects.application.application_object'],
         handler: async (a) => {
             const status = await executor.status();
-            if (a.probe === false) return formatResponse(status, 'Status');
+            // Probing starts the app, so by default only probe one that is already running.
+            const closed = status.running === false && status.backend?.resolved !== 'artcraft';
+            if (a.probe === false || (a.probe === undefined && closed)) {
+                return formatResponse(closed ? { ...status, note: 'After Effects is not running. Open it, or call again with probe: true to start it.' } : status, 'Status');
+            }
             try {
                 const r = await executor.runStructured(script('__result__ = { version: app.version, build: app.buildName, project: app.project.file ? app.project.file.fsName : null, items: app.project.numItems };'));
                 if (!r.ok) return formatErrorResponse({ ...status, error: r.error }, 'Status');
