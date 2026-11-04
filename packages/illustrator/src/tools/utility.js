@@ -14,11 +14,15 @@ export const tools = [
     {
         name: 'illustrator_status',
         description: 'Check that Illustrator is reachable: platform, how the server addresses Illustrator, whether it is running, its version and open documents. Use this first when a call fails to connect',
-        inputSchema: { type: 'object', properties: { probe: { type: 'boolean', description: 'Ask Illustrator for its version and documents (starts Illustrator if it is not running). Default true', default: true } } },
+        inputSchema: { type: 'object', properties: { probe: { type: 'boolean', description: 'Ask Illustrator for its version and documents. Default: only when Illustrator is already running, so a status check never starts it; true starts Illustrator if needed' } } },
         features: ['illustrator.application.app_object'],
         handler: async (a) => {
             const status = await executor.status();
-            if (a.probe === false) return formatResponse(status, 'Status');
+            // Probing starts the app, so by default only probe one that is already running.
+            const closed = status.running === false && status.backend?.resolved !== 'artcraft';
+            if (a.probe === false || (a.probe === undefined && closed)) {
+                return formatResponse(closed ? { ...status, note: 'Illustrator is not running. Open it, or call again with probe: true to start it.' } : status, 'Status');
+            }
             try {
                 const r = await executor.runStructured(script(`
 __result__ = { version: app.version, documents: app.documents.length, active: app.documents.length ? app.activeDocument.name : null };`, { needsDocument: false }));
