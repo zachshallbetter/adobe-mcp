@@ -57,8 +57,22 @@ There is one process to run: the MCP server is also the WebSocket server.
    }
    ```
 
-2. Load the plugin in Premiere Pro. Until it is published, load it with the
-   UXP Developer Tool:
+2. Install the plugin in Premiere Pro (quit Premiere Pro first):
+
+   ```bash
+   npx -y adobe-mcp-premiere install-plugin
+   ```
+
+   This packages the plugin as a `.ccx` and installs it with Adobe's Unified
+   Plugin Installer Agent, which comes with the Creative Cloud app. Then open
+   Premiere Pro and choose **Window > UXP Plugins > MCP Bridge**; the panel
+   connects to the server by itself. *Not yet verified against a real Premiere Pro
+   install (creative-mcp#17).* If the installer reports status -411, Creative Cloud
+   doesn't see a compatible Premiere Pro yet: update it, open it once and run the
+   command again. `install-plugin --package` only writes the `.ccx`, which you can
+   also double-click.
+
+   Or load it by hand with the UXP Developer Tool:
 
    - In Premiere Pro, turn on Developer Mode in the Plugins settings.
    - Install and open the UXP Developer Tool from the Creative Cloud app.
@@ -68,8 +82,8 @@ There is one process to run: the MCP server is also the WebSocket server.
      folder of the copy your server runs from.
    - Click **Load**, then open the **MCP Bridge** panel from Premiere Pro's Window menu.
 
-3. In the panel, set the port (3011 unless you changed `PREMIERE_WS_PORT`) and
-   the token (if you set `BRIDGE_TOKEN`), and click **Connect**. The panel
+3. The panel connects on port 3011 as soon as it opens. Only if you changed
+   `PREMIERE_WS_PORT` or set `BRIDGE_TOKEN`, enter them in the panel and click **Connect**. The panel
    remembers both and reconnects every 3 s whenever the connection drops, so
    it connects again by itself after the MCP server restarts.
 

@@ -5,6 +5,11 @@
  */
 import { createServer } from './server.js';
 
+if (process.argv[2] === 'install-plugin') {
+    const { main } = await import('./install-plugin.js');
+    process.exit(main(process.argv.slice(3)));
+}
+
 try {
     await createServer().run();
 } catch (error) {
