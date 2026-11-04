@@ -9,12 +9,16 @@ export const tools = [
     {
         name: 'photoshop_status',
         description: 'Check that Photoshop is reachable: platform, how the server addresses Photoshop, whether it is running, its version and open documents. Use this first when a call fails to connect',
-        inputSchema: { type: 'object', properties: { probe: { type: 'boolean', description: 'Ask Photoshop for its version and documents (starts Photoshop if it is not running). Default true', default: true } } },
+        inputSchema: { type: 'object', properties: { probe: { type: 'boolean', description: 'Ask Photoshop for its version and documents. Default: only when Photoshop is already running, so a status check never starts it; true starts Photoshop if needed' } } },
         hints: { readOnly: true },
         features: ['photoshop.application.application_object', 'photoshop.application.version_info'],
         handler: async (a) => {
             const status = await executor.status();
-            if (a.probe === false) return formatResponse(status, 'Status');
+            // Probing starts the app, so by default only probe one that is already running.
+            const closed = status.running === false && status.backend?.resolved !== 'artcraft';
+            if (a.probe === false || (a.probe === undefined && closed)) {
+                return formatResponse(closed ? { ...status, note: 'Photoshop is not running. Open it, or call again with probe: true to start it.' } : status, 'Status');
+            }
             try {
                 const r = await executor.runStructured(script(`
 __result__ = { version: app.version, build: app.build, scriptingVersion: app.scriptingVersion, documents: app.documents.length, active: app.documents.length ? app.activeDocument.name : null };`, { needsDocument: false }));
