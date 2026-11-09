@@ -1,6 +1,6 @@
 # Releasing
 
-The procedure is in the root [CONTRIBUTING.md](../CONTRIBUTING.md#releasing): bump
+The procedure is in the root [CONTRIBUTING.md](../../CONTRIBUTING.md#releasing): bump
 `version` in the package's `package.json` and `server.json` (both fields), update its
 changelog and README tool count (and the root README's table), commit, then push an
 **annotated** tag `<package>@<version>` (`git tag -a … -m …`; `tag.gpgsign` is on, so
