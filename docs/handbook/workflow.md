@@ -12,13 +12,20 @@ epics, and records the findings in the atlas. The scripts for each step are in
 
 ```
 ~/Projects/
-  adobe-mcp/                 this repository (main checkout)
-  adobe-capability-atlas/    the atlas (private)
-  adobe-mcp-wt/              one worktree per piece of work
-    _coord/                  the work folder: plans, issue state, ticket cache, findings, landing queue
-    <slug>/                  a builder's worktree, branch <app>-<slug>
-    main-view/               a detached checkout of origin/main for checks (read only)
+  creative-mcp/adobe-mcp/            this repository (main checkout)
+  adobe-capability-atlas/            the atlas (private)
+  _worktrees/adobe-mcp/
+    _coord/                          the work folder: plans, issue state, ticket cache, findings, landing queue
+    <slug>/                          a builder's worktree, branch <app>-<slug>
+    main-view/                       a detached checkout of origin/main for checks (read only)
 ```
+
+The repository moved from `~/Projects/adobe-mcp` (October 2026) to
+`~/Projects/creative-mcp/adobe-mcp`, and the October rounds' work folder
+(`~/Projects/adobe-mcp-wt/_coord`) no longer exists. Everything a later round needs
+from it is in the GitHub issues, the atlas findings and this handbook; the scripts
+recreate the work folder when they run. The defaults in `scripts/` may still name the
+old paths, so set the variables below.
 
 The work folder must survive a reboot: never keep it in `/tmp`. Override any of these
 with `ADOBE_MCP_REPO`, `ADOBE_MCP_WT`, `ADOBE_MCP_WORK` and `ATLAS_DIR`.
