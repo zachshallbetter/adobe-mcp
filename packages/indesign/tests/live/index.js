@@ -20,20 +20,33 @@ export async function status(call) {
     return (await state({ probe: true }))?.version ?? null;
 }
 
-/** Create a scratch document, run steps in it, then close it, even when a step fails. */
+/** InDesign's document count and active document name, read without starting it. */
+async function documents(t) {
+    const s = (await t.call('indesign_status', { probe: true }))?.result?.indesign ?? {};
+    return { count: s.documentCount ?? 0, active: s.activeDocument ?? null };
+}
+
+/**
+ * Create a scratch document, run steps in it, then close every document the steps left
+ * open, even when a step fails. Only documents this scenario made are closed: the new
+ * document under its first name or the name it was saved as (live-<n>.indd), and never
+ * more than were opened.
+ */
 async function inNewDocument(t, steps) {
+    const before = await documents(t);
     const created = text(await t.call('create_document', { width: 210, height: 297, pages: 2, marginTop: 15, marginBottom: 15, marginLeft: 15, marginRight: 15 }));
     const name = created.match(/Document name: (.+)/)?.[1]?.trim();
     const info = text(await t.call('get_document_info'));
     t.check('create_document', field(info, 'Name') === name && field(info, 'Pages') === '2' && Number(field(info, 'Document Width')) === 210 && Number(field(info, 'Margin Top')) === 15,
         'get_document_info reports the new document by name with 2 pages, width 210 mm and top margin 15 mm');
     t.check('get_document_info', field(info, 'Name') === name, 'its Name matches the document create_document reported');
+    const ours = (n) => n === name || /^live-\d+\.indd$/.test(n ?? '');
     try {
         await steps(name);
     } finally {
-        const active = text(await t.call('get_document_info'));
-        // Close only our own scratch document.
-        if (field(active, 'Name') === name) await t.call('close_document');
+        for (let now = await documents(t); now.count > before.count && ours(now.active); now = await documents(t)) {
+            await t.call('close_document');
+        }
     }
 }
 
