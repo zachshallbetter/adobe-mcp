@@ -2,7 +2,9 @@
 // Run an app's live scenarios against the real, running application and record each
 // tool's outcome for the capability atlas.
 //
-//   node scripts/live.mjs <app> [--atlas <atlas checkout>] [--only <scenario regex>]
+//   node scripts/live.mjs <app> [--atlas <atlas checkout>] [--only <scenario regex>] [--trace]
+//
+// --trace prints the time of every tool call to stderr, to match against what the screen did.
 //
 // The app must already be open; it is left in the background (<APP>_ACTIVATE=false). Scenarios are in packages/<app>/tests/live/index.js and
 // work only in ~/Documents/adobe-mcp-validation. Records go to
@@ -43,6 +45,7 @@ const report = await runLive({
     server: `${pkg.name}@${pkg.version} (adobe-mcp ${sha}${dirty})`,
     os,
     atlasDir: resolve(opt('--atlas') ?? join(root, '..', 'adobe-capability-atlas')),
+    trace: rest.includes('--trace') ? (line) => process.stderr.write(`${line}\n`) : undefined,
 });
 
 const s = report.summary;

@@ -50,8 +50,9 @@ function reportedFailure(value) {
  * @param {string} opts.os             e.g. 'macOS 27.2'
  * @param {string} [opts.atlasDir]     write corpus/<app>/validation/<date>.json here
  * @param {() => Promise<Client>} [opts.connect]  a connected client instead of starting `command` (tests)
+ * @param {(line: string) => void} [opts.trace]  called with the time and name of every tool call
  */
-export async function runLive({ app, command, env = {}, scenarios, server, status, os, atlasDir, connect }) {
+export async function runLive({ app, command, env = {}, scenarios, server, status, os, atlasDir, connect, trace }) {
     const client = connect ? await connect() : await (async () => {
         const c = new Client({ name: 'adobe-mcp-live', version: '1.0.0' });
         await c.connect(new StdioClientTransport({ command: process.execPath, args: [command], env: { ...process.env, ...env } }));
@@ -74,6 +75,7 @@ export async function runLive({ app, command, env = {}, scenarios, server, statu
 
     const t = {
         async call(tool, args = {}) {
+            if (trace) trace(`${new Date().toISOString().slice(11, 23)} ${tool}`);
             if (!records.has(tool)) record(tool, { outcome: 'smoke', args });
             let result;
             try {
