@@ -22,6 +22,13 @@ import { wrapScriptForStructuredResult, parseStructuredResult } from './structur
 
 const IS_WINDOWS = process.platform === 'win32';
 
+/**
+ * Script calls that act through the application's menus or recorded Actions, which need the
+ * application in front: Illustrator executeMenuCommand, InDesign menuActions, Photoshop
+ * runMenuItem, After Effects executeCommand.
+ */
+export const FRONT_ONLY = /\bexecuteMenuCommand\(|\bmenuActions\b|\brunMenuItem\(|\bexecuteCommand\(/;
+
 /** Run a process; resolves with trimmed stdout, rejects with an Error carrying stderr. */
 export function runProcess(file, args, { timeoutMs }) {
     return new Promise((resolve, reject) => {
@@ -64,7 +71,10 @@ export function powerShellString(value) {
  * @param {(o: { scriptPath: string, run: typeof runProcess, timeoutMs: number }) => Promise<string>} [app.winRun]
  *        Windows: run the .jsx at scriptPath another way and resolve with its result, for an
  *        application without a COM scripting object (After Effects runs scripts with AfterFX.exe -r)
- * @param {boolean} [app.activate=true] bring the application to the front first (menu commands need it)
+ * @param {boolean} [app.activate=true] bring the application to the front first (menu commands need it).
+ *        <PREFIX>_ACTIVATE=false keeps it in the background, except for scripts matching app.needsFront
+ * @param {RegExp} [app.needsFront=FRONT_ONLY] scripts that bring the application to the front even
+ *        when <PREFIX>_ACTIVATE=false
  * @param {number} [app.timeoutMs=120000]
  * @param {Array<{ name: string, isAvailable: () => Promise<boolean>, run: (script: string) => Promise<string>, isUnavailableError?: (e: Error) => boolean }>} [app.backends]
  * @param {typeof runProcess} [app.run] process runner (tests replace it)
@@ -73,7 +83,7 @@ export function createExecutor(app) {
     const {
         label, envPrefix, appNamePrefix, defaultAppName,
         macScript, macBundleId, winProgIds = [], winInvoke, winProcessName, winRun,
-        activate = true, backends = [],
+        activate = true, needsFront = FRONT_ONLY, backends = [],
     } = app;
     const run = app.run ?? runProcess;
     const tempPrefix = `${envPrefix.toLowerCase()}_mcp_`;
@@ -82,6 +92,13 @@ export function createExecutor(app) {
     let appName = null;
     let resolved = null;
     let resolvedAt = 0;
+
+    /** Whether to bring the application to the front before running this script. */
+    const front = (script) => {
+        const setting = String(env('ACTIVATE') ?? '').trim().toLowerCase();
+        if (setting === 'false' || setting === '0' || setting === 'no') return needsFront.test(script);
+        return activate;
+    };
 
     const timeoutMs = () => {
         const n = Number(env('SCRIPT_TIMEOUT_MS'));
@@ -211,7 +228,7 @@ export function createExecutor(app) {
             const source = [
                 `with timeout of ${seconds} seconds`,
                 `  tell application ${byId ? `id ${appleScriptString(macBundleId)}` : appleScriptString(name)}`,
-                ...(activate ? ['    activate'] : []),
+                ...(front(script) ? ['    activate'] : []),
                 `    ${macScript({ appName: name, scriptPath: scriptPath.replace(/\\/g, '/') })}`,
                 '  end tell',
                 'end timeout',
