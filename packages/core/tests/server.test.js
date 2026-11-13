@@ -73,7 +73,7 @@ test('the audit captures scripts with the executor stubbed', async () => {
     assert.equal(await executor.runScript('x'), 'live run', 'the stub is removed afterwards');
 });
 
-test('executor: <PREFIX>_ACTIVATE=false keeps the app in the background except for menu commands', { skip: process.platform === 'win32' }, async () => {
+test('executor: <PREFIX>_ACTIVATE=false keeps the app in the background', { skip: process.platform === 'win32' }, async () => {
     const calls = [];
     const executor = createExecutor({
         label: 'Illustrator', envPrefix: 'ADOBE_MCP_TEST', appNamePrefix: 'Adobe Illustrator', defaultAppName: 'Adobe Illustrator',
@@ -86,8 +86,8 @@ test('executor: <PREFIX>_ACTIVATE=false keeps the app in the background except f
         assert.equal(await activated('app.name;'), true, 'activates by default');
         process.env.ADOBE_MCP_TEST_ACTIVATE = 'false';
         assert.equal(await activated('app.name;'), false, 'background when ACTIVATE=false');
-        assert.equal(await activated('app.executeMenuCommand("group");'), true, 'menu commands still activate');
-        assert.equal(await activated('app.menuActions.itemByID(1).invoke();'), true);
+        assert.equal(await activated('app.executeMenuCommand("group");'), false, 'menu commands too');
+        assert.equal(await activated('app.menuActions.itemByID(1).invoke();'), false);
         process.env.ADOBE_MCP_TEST_ACTIVATE = 'true';
         assert.equal(await activated('app.name;'), true);
     } finally {

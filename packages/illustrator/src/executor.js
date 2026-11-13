@@ -7,7 +7,7 @@
  * JavaScript.)
  * Windows: the COM object's DoJavaScriptFile(). DoScript() also plays an Action.
  */
-import { createExecutor, appleScriptString, powerShellString, formatResponse, formatErrorResponse, FRONT_ONLY } from 'adobe-mcp-core';
+import { createExecutor, appleScriptString, powerShellString, formatResponse, formatErrorResponse } from 'adobe-mcp-core';
 
 import { client as vectorcraftClient } from './artcraft/vectorcraft-adapter.js';
 
@@ -21,8 +21,6 @@ export const executor = createExecutor({
     winProgIds: ['Illustrator.Application'],
     winInvoke: ({ scriptPath }) => `$app.DoJavaScriptFile(${powerShellString(scriptPath)})`,
     winProcessName: 'Illustrator.exe',
-    // app.doScript plays a recorded Action, which needs Illustrator in front like a menu command.
-    needsFront: new RegExp(`${FRONT_ONLY.source}|\\bapp\\.doScript\\(`),
     backends: [
         {
             name: 'artcraft',
