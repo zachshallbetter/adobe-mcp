@@ -243,7 +243,7 @@ export class BookHandlers {
             'for (var i = 0; i < book.bookContents.length; i++) {',
             '  var content = book.bookContents[i];',
             '  info += "Document " + (i + 1) + ": " + content.name + "\\n";',
-            '  info += "  Status: " + content.status + "\\n";',
+            '  info += "  Status: " + content.status.toString() + "\\n";',
             '  info += "  Pages: " + content.documentPageRange + "\\n";',
             '  var cpath = "(unknown)";',
             '  try { cpath = content.fullName.fsName; } catch (eP) {}',

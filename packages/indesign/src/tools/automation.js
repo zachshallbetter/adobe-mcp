@@ -510,10 +510,12 @@ __result__ = { id: sma.id, title: sma.title, menu: at.title };`, { needsDocument
             if (!Array.isArray(list) || !list.length || list.length > PERFORMANCE.length) throw new Error("'metrics' must be a list of metric names");
             const names = list.map((m, i) => enumOf(m, PERFORMANCE, { name: `metrics[${i}]` }));
             const mem = has(a.includeMemoryStatistics) ? flag(a.includeMemoryStatistics, 'includeMemoryStatistics') : 'false';
+            // 64-bit metrics (memory sizes) come back as [high, low] signed 32-bit words: join them.
             return run('Performance metrics', script(`var names = ${json(names)}, out = {};
+var word64 = function (v) { return (v instanceof Array && v.length === 2) ? v[0] * 4294967296 + (v[1] < 0 ? v[1] + 4294967296 : v[1]) : v; };
 for (var i = 0; i < names.length; i++) {
   var k = PerformanceMetricOptions[names[i]];
-  try { out[names[i]] = { value: app.performanceMetric(k), name: app.performanceMetricLongName(k) }; } catch (e) { out[names[i]] = { error: e.message }; }
+  try { out[names[i]] = { value: word64(app.performanceMetric(k)), name: app.performanceMetricLongName(k) }; } catch (e) { out[names[i]] = { error: e.message }; }
 }
 var stats = null;
 if (${mem}) { try { stats = app.memoryStatistics(); } catch (e) { stats = { error: e.message }; } }

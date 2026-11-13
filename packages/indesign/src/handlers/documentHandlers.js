@@ -233,7 +233,7 @@ export class DocumentHandlers {
             'info += "Document Width: " + fmt(dp.pageWidth) + "\\n";',
             'info += "Document Height: " + fmt(dp.pageHeight) + "\\n";',
             'info += "Facing Pages: " + dp.facingPages + "\\n";',
-            'info += "Page Orientation: " + dp.pageOrientation + "\\n";',
+            'info += "Page Orientation: " + dp.pageOrientation.toString() + "\\n";',
             'info += "Bleed Top: " + fmt(dp.documentBleedTopOffset) + "\\n";',
             'info += "Bleed Bottom: " + fmt(dp.documentBleedBottomOffset) + "\\n";',
             'info += "Bleed Inside: " + fmt(dp.documentBleedInsideOrLeftOffset) + "\\n";',
@@ -636,7 +636,7 @@ export class DocumentHandlers {
             'out += "Colors: " + doc.colors.length + "\\n";',
             'for (var i = 0; i < doc.colors.length; i++) {',
             '  var col = doc.colors[i];',
-            '  out += "- " + col.name + " (" + col.model + ", " + col.space + ")\\n";',
+            '  out += "- " + col.name + " (" + col.model.toString() + ", " + col.space.toString() + ")\\n";',
             '}',
         ];
         if (toBool(includeSwatches, 'includeSwatches')) {
@@ -984,7 +984,7 @@ export class DocumentHandlers {
             '  out += "Section " + (i + 1) + (section.name ? " (" + section.name + ")" : "") + "\\n";',
             '  out += "  Starts on page: " + section.pageStart.name + " (index " + section.pageStart.documentOffset + ")\\n";',
             '  out += "  Pages: " + section.length + "\\n";',
-            '  out += "  Numbering: " + section.pageNumberStyle + (section.continueNumbering ? ", continued" : ", starts at " + section.pageNumberStart) + "\\n";',
+            '  out += "  Numbering: " + section.pageNumberStyle.toString() + (section.continueNumbering ? ", continued" : ", starts at " + section.pageNumberStart) + "\\n";',
             '  out += "  Prefix: " + section.sectionPrefix + " (included: " + section.includeSectionPrefix + ")\\n";',
             '  out += "  Marker: " + section.marker + "\\n";',
             '}',
@@ -1214,7 +1214,7 @@ export class DocumentHandlers {
                 'checks.push("links");',
                 'for (var i = 0; i < doc.links.length; i++) {',
                 '  var lk = doc.links[i];',
-                '  if (lk.status != LinkStatus.NORMAL && lk.status != LinkStatus.LINK_EMBEDDED) { issues.push("Link " + lk.status + ": " + lk.name); }',
+                '  if (lk.status != LinkStatus.NORMAL && lk.status != LinkStatus.LINK_EMBEDDED) { issues.push("Link " + lk.status.toString() + ": " + lk.name); }',
                 '}',
             );
         }
@@ -1223,7 +1223,7 @@ export class DocumentHandlers {
                 'checks.push("fonts");',
                 'for (var f = 0; f < doc.fonts.length; f++) {',
                 '  var fnt = doc.fonts[f];',
-                '  if (fnt.status != FontStatus.INSTALLED) { issues.push("Font " + fnt.status + ": " + fnt.name); }',
+                '  if (fnt.status != FontStatus.INSTALLED) { issues.push("Font " + fnt.status.toString() + ": " + fnt.name); }',
                 '}',
             );
         }
@@ -1235,7 +1235,7 @@ export class DocumentHandlers {
                 '  var where = ""; try { if (gr.parentPage) { where = " on page " + gr.parentPage.name; } } catch (e) {}',
                 '  var glink = gr.itemLink;',
                 '  var gname = glink ? glink.name : "embedded graphic";',
-                '  if (glink && glink.status != LinkStatus.NORMAL && glink.status != LinkStatus.LINK_EMBEDDED) { issues.push("Graphic link " + glink.status + ": " + gname + where); }',
+                '  if (glink && glink.status != LinkStatus.NORMAL && glink.status != LinkStatus.LINK_EMBEDDED) { issues.push("Graphic link " + glink.status.toString() + ": " + gname + where); }',
                 '  if (gr instanceof Image) {',
                 '    try {',
                 '      var ppi = gr.effectivePpi;',
