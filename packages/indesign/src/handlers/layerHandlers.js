@@ -54,7 +54,7 @@ export class LayerHandlers {
             // Lock last: properties of a locked layer can still be set, but locking
             // after creation keeps the intent explicit.
             `      layer.locked = ${bool(locked)};`,
-            '      "Layer created: " + layer.name + " (index " + layer.index + ", visible: " + layer.visible + ", locked: " + layer.locked + ", color: " + layer.layerColor + "). Total layers: " + doc.layers.length;',
+            '      "Layer created: " + layer.name + " (index " + layer.index + ", visible: " + layer.visible + ", locked: " + layer.locked + ", color: " + layer.layerColor.toString() + "). Total layers: " + doc.layers.length;',
             '    } catch (error) {',
             '      "Error creating layer: " + error.message;',
             '    }',
@@ -116,7 +116,7 @@ export class LayerHandlers {
             '    out += "  Visible: " + layer.visible + "\\n";',
             '    out += "  Locked: " + layer.locked + "\\n";',
             '    out += "  Printable: " + layer.printable + "\\n";',
-            '    out += "  Color: " + layer.layerColor + "\\n";',
+            '    out += "  Color: " + layer.layerColor.toString() + "\\n";',
             '    out += "  Page items: " + layer.pageItems.length + "\\n";',
             '    out += "  Guides: " + layer.guides.length + "\\n";',
             '  }',
