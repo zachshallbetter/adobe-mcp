@@ -7,6 +7,7 @@
  */
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { readScenario } from './read.js';
 
 /** The text a tool returned: InDesign handlers wrap their script's string in { success, result }. */
 const text = (r) => (typeof r === 'string' ? r : typeof r?.result === 'string' ? r.result : JSON.stringify(r));
@@ -115,6 +116,8 @@ export function scenarios(out) {
             await t.call('export_pdf', { filePath: pdf, quality: 'SCREEN', pages: '1' });
             t.check('export_pdf', existsSync(pdf) && statSync(pdf).size > 1000, `a PDF of more than 1 KB exists at ${pdf}`);
         })],
+
+        readScenario(inNewDocument),
 
         ['close', async (t) => {
             // close_document is checked on its own document: its effect is that the document is gone.
