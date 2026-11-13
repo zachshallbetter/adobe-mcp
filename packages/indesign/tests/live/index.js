@@ -9,6 +9,7 @@ import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { readScenario } from './read.js';
 import { fileScenarios } from './files.js';
+import { formatScenarios } from './format.js';
 
 /** The text a tool returned: InDesign handlers wrap their script's string in { success, result }. */
 const text = (r) => (typeof r === 'string' ? r : typeof r?.result === 'string' ? r.result : JSON.stringify(r));
@@ -138,6 +139,7 @@ export function scenarios(out) {
 
         readScenario(inNewDocument),
         ...fileScenarios(inNewDocument, out, { documents, closeScratch }),
+        ...formatScenarios(inNewDocument),
 
         ['close', async (t) => {
             // close_document is checked on its own document: its effect is that the document is gone.
