@@ -22,6 +22,7 @@ import { wrapScriptForStructuredResult, parseStructuredResult } from './structur
 
 const IS_WINDOWS = process.platform === 'win32';
 
+
 /** Run a process; resolves with trimmed stdout, rejects with an Error carrying stderr. */
 export function runProcess(file, args, { timeoutMs }) {
     return new Promise((resolve, reject) => {
@@ -64,7 +65,8 @@ export function powerShellString(value) {
  * @param {(o: { scriptPath: string, run: typeof runProcess, timeoutMs: number }) => Promise<string>} [app.winRun]
  *        Windows: run the .jsx at scriptPath another way and resolve with its result, for an
  *        application without a COM scripting object (After Effects runs scripts with AfterFX.exe -r)
- * @param {boolean} [app.activate=true] bring the application to the front first (menu commands need it)
+ * @param {boolean} [app.activate=true] bring the application to the front first.
+ *        <PREFIX>_ACTIVATE=false never does: every script runs with the application in the background
  * @param {number} [app.timeoutMs=120000]
  * @param {Array<{ name: string, isAvailable: () => Promise<boolean>, run: (script: string) => Promise<string>, isUnavailableError?: (e: Error) => boolean }>} [app.backends]
  * @param {typeof runProcess} [app.run] process runner (tests replace it)
@@ -82,6 +84,13 @@ export function createExecutor(app) {
     let appName = null;
     let resolved = null;
     let resolvedAt = 0;
+
+    /** Whether to bring the application to the front before running a script. */
+    const front = () => {
+        const setting = String(env('ACTIVATE') ?? '').trim().toLowerCase();
+        if (setting === 'false' || setting === '0' || setting === 'no') return false;
+        return activate;
+    };
 
     const timeoutMs = () => {
         const n = Number(env('SCRIPT_TIMEOUT_MS'));
@@ -211,7 +220,7 @@ export function createExecutor(app) {
             const source = [
                 `with timeout of ${seconds} seconds`,
                 `  tell application ${byId ? `id ${appleScriptString(macBundleId)}` : appleScriptString(name)}`,
-                ...(activate ? ['    activate'] : []),
+                ...(front() ? ['    activate'] : []),
                 `    ${macScript({ appName: name, scriptPath: scriptPath.replace(/\\/g, '/') })}`,
                 '  end tell',
                 'end timeout',

@@ -178,7 +178,9 @@ await test('insert_table inserts at a text location or nests in a cell', async (
 await test('insert_table_rows_columns adds rows or columns next to a reference', async () => {
     const s = await one('insert_table_rows_columns', { table: T, kind: 'rows', count: 3, reference: 2, position: 'before', size: 8 });
     assert.ok(s.includes('list = t.rows;') && s.includes('var refIndex = 2;'));
-    assert.ok(s.includes('var added = list.add(LocationOptions.BEFORE, ref);') && s.includes('added.height = 8;') && s.includes('i < 3;'));
+    // The reference is looked up on every pass: a kept reference widens after each insert.
+    assert.ok(s.includes('var added = list.add(LocationOptions.BEFORE, list[refIndex]);') && s.includes('added.height = 8;') && s.includes('i < 3;'));
+    assert.ok(!s.includes('var ref = list[refIndex];'));
     const c = await one('insert_table_rows_columns', { table: T, kind: 'columns', size: 20 });
     assert.ok(c.includes('list = t.columns;') && c.includes('var refIndex = list.length - 1;') && c.includes('LocationOptions.AFTER') && c.includes('added.width = 20;'));
     refuses('insert_table_rows_columns', { table: T, kind: 'cells' }, /Allowed: rows, columns/);
