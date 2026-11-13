@@ -37,6 +37,7 @@ env:
 jobs:
   status:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Install mcp-publisher
         run: |
