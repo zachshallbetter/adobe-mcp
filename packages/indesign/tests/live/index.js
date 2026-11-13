@@ -43,7 +43,7 @@ export function scenarios(out) {
             let info = text(await t.call('get_document_info'));
             t.check('add_page', field(info, 'Pages') === '3', 'get_document_info goes from 2 to 3 pages');
             const page = text(await t.call('get_page_info', { pageIndex: 2 }));
-            t.check('get_page_info', /210/.test(page) && /297/.test(page), 'page 3 reports the document size, 210 × 297 mm');
+            t.check('get_page_info', field(page, 'Size \\(mm\\)') === '210 x 297' && field(page, 'Index') === '2', 'page 3 reports index 2 and the document size, 210 x 297 mm');
             await t.call('delete_page', { pageIndex: 2 });
             info = text(await t.call('get_document_info'));
             t.check('delete_page', field(info, 'Pages') === '2', 'get_document_info goes back to 2 pages');
@@ -94,8 +94,10 @@ export function scenarios(out) {
 
             await t.call('create_text_frame', { content: 'Styled', pageIndex: 0, x: 20, y: 20, width: 100, height: 30 });
             await t.call('apply_paragraph_style', { styleName: 'Live Heading', frameIndex: 0, pageIndex: 0 });
-            const frame = text(await t.call('get_page_item_info', { pageIndex: 0, itemIndex: 0 }));
-            t.check('apply_paragraph_style', /Live Heading/.test(frame), 'get_page_item_info names "Live Heading" as the frame\'s paragraph style');
+            const frameId = Number(field(text(await t.call('get_page_item_info', { pageIndex: 0, itemIndex: 0 })), 'ID'));
+            const formatting = JSON.stringify(await t.call('get_paragraph_formatting', { target: { frameIds: [frameId], wholeStory: true }, maxParagraphs: 5 }));
+            t.check('apply_paragraph_style', /"style":"Live Heading"/.test(formatting), 'get_paragraph_formatting reports "Live Heading" as the frame\'s paragraph style');
+            t.check('get_paragraph_formatting', /"style":"Live Heading"/.test(formatting) && /"text":"Styled/.test(formatting), 'reads the styled paragraph, its text and its style, by frame id');
 
             await t.call('create_rectangle', { pageIndex: 0, x: 20, y: 80, width: 50, height: 50 });
             await t.call('apply_color', { itemIndex: 0, colorName: 'Live Teal', colorType: 'FILL', targetType: 'pageItem', pageIndex: 0 });
@@ -119,8 +121,9 @@ export function scenarios(out) {
             const created = text(await t.call('create_document', { pages: 1 }));
             const name = created.match(/Document name: (.+)/)?.[1]?.trim();
             await t.call('close_document');
-            const s = await t.call('indesign_status', { probe: true });
-            t.check('close_document', (s?.result ?? s)?.indesign?.activeDocument !== name, `indesign_status no longer reports "${name}" as the active document`);
+            const s = (await t.call('indesign_status', { probe: true }))?.result;
+            t.check('close_document', s?.indesign?.activeDocument !== name, `indesign_status no longer reports "${name}" as the active document`);
+            t.check('indesign_status', s?.indesign?.reachable === true && /^\d+\.\d/.test(s?.indesign?.version ?? ''), 'probe: true reaches the running InDesign and reports its version');
         }],
     ];
 }
