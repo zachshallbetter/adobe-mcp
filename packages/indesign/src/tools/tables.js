@@ -1084,9 +1084,10 @@ __result__ = { table: __tableInfo(nt) };`));
 var t = __table(doc, ${tableSpec(a.table)}), list = t.${kind};
 var refIndex = ${ref ?? 'list.length - 1'};
 if (refIndex >= list.length) throw new Error("reference " + refIndex + " is out of range: the table has " + list.length + " ${kind}");
-var ref = list[refIndex];
+// Look the reference row or column up again on every pass: a reference kept across inserts
+// widens to cover the inserted ones, so each add would insert more than one.
 for (var i = 0; i < ${count}; i++) {
-  var added = list.add(LocationOptions.${position.toUpperCase()}, ref);
+  var added = list.add(LocationOptions.${position.toUpperCase()}, list[refIndex]);
   ${size}
 }
 __result__ = { table: __tableInfo(t), inserted: ${count} };`));
