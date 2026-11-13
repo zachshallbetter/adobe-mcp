@@ -91,6 +91,24 @@ If you claim an atlas id the fixture doesn't have, regenerate
 `tests/fixtures/feature-ids.json` (`node scripts/update-feature-ids.js` where the
 package has it).
 
+## Live validation
+
+The tests above never reach an application. To validate a tool, add a step to the
+app's live scenarios in `packages/<app>/tests/live/index.js`: call the tool, read its
+effect back through another tool, and `t.check(tool, ok, how)` with what was compared.
+A tool that is called but not checked is recorded as a smoke run, not as validated.
+Scenarios work in documents they create, in `~/Documents/adobe-mcp-validation`, and
+close only those.
+
+With the application already open (the run never starts it):
+
+```bash
+node scripts/live.mjs <app> [--only <scenario regex>] [--atlas <atlas checkout>]
+```
+
+It writes one record per tool to the atlas (`corpus/<app>/validation/<date>.json`);
+re-run the app's tool extractor there to update `validated`. Never in CI.
+
 ## Pull requests
 
 - Rebase on `origin/main` first; in `src/server.js` and `src/tools/index.js` keep
