@@ -47,6 +47,7 @@ export function readScenario(inNewDocument) {
         await expect('get_session_info', {}, (s) => has(s, '"hasActiveDocument":true'), 'reports an active document');
         const groups = await read('list_groups', { pageIndex: 0 });
         t.check('list_groups', has(groups, 'Members: 2'), 'lists the group of 2 items');
+        t.check('create_group_from_items', has(groups, 'Members: 2'), 'list_groups shows the new group of the text frame and rectangle');
         const groupIndex = Number(groups.match(/Group Index: (\d+)/)?.[1]);
         await expect('get_group_info', { pageIndex: 0, groupIndex }, (s) => has(s, 'TextFrame', 'Rectangle'), 'the group holds the text frame and the rectangle');
         await expect('list_master_spreads', {}, (s) => has(s, 'Name: A-Parent'), 'lists A-Parent');
@@ -60,7 +61,9 @@ export function readScenario(inNewDocument) {
         await expect('get_text_wrap', { target: { ids: [ovalId] } }, (s) => has(s, `"id":${ovalId}`, '"mode":"NONE"'), 'the oval has no text wrap');
         await expect('get_editorial_preferences', {}, (s) => has(s, '"userName"'), 'reports the user name and notes settings');
         await expect('get_story_statistics', { story: { frameId } }, (s) => has(s, /"words":5\b/), 'the story has 5 words');
-        await expect('get_table_info', {}, (s) => has(s, '"count":1', '"rows":3', '"columns":2'), 'one table of 3 rows and 2 columns');
+        const tables = await read('get_table_info');
+        t.check('get_table_info', has(tables, '"count":1', '"rows":3', '"columns":2'), 'one table of 3 rows and 2 columns');
+        t.check('create_table', has(tables, '"rows":3', '"columns":2'), 'get_table_info shows the new 3 x 2 table');
         await expect('get_path_info', { target: { ids: [ovalId] } }, (s) => has(s, '"x":100', '"width":40'), 'the oval at x 100 mm, 40 mm wide');
         await expect('get_item_effects', { target: { ids: [ovalId] } }, (s) => has(s, `"id":${ovalId}`), 'reports the oval by id');
         await expect('get_transparency_settings', {}, (s) => has(s, '"blendSpace"'), 'reports the blend space');
