@@ -8,6 +8,7 @@
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { readScenario } from './read.js';
+import { fileScenarios } from './files.js';
 
 /** The text a tool returned: InDesign handlers wrap their script's string in { success, result }. */
 const text = (r) => (typeof r === 'string' ? r : typeof r?.result === 'string' ? r.result : JSON.stringify(r));
@@ -29,7 +30,7 @@ async function documents(t) {
 /**
  * Create a scratch document, run steps in it, then close every document the steps left
  * open, even when a step fails. Only documents this scenario made are closed: the new
- * document under its first name or the name it was saved as (live-<n>.indd), and never
+ * document under its first name or the name it was saved as (live-…indd), and never
  * more than were opened.
  */
 async function inNewDocument(t, steps) {
@@ -40,13 +41,18 @@ async function inNewDocument(t, steps) {
     t.check('create_document', field(info, 'Name') === name && field(info, 'Pages') === '2' && Number(field(info, 'Document Width')) === 210 && Number(field(info, 'Margin Top')) === 15,
         'get_document_info reports the new document by name with 2 pages, width 210 mm and top margin 15 mm');
     t.check('get_document_info', field(info, 'Name') === name, 'its Name matches the document create_document reported');
-    const ours = (n) => n === name || /^live-\d+\.indd$/.test(n ?? '');
     try {
         await steps(name);
     } finally {
-        for (let now = await documents(t); now.count > before.count && ours(now.active); now = await documents(t)) {
-            await t.call('close_document');
-        }
+        await closeScratch(t, before.count, name);
+    }
+}
+
+/** Close the active document while it is one of ours and more are open than `count`. */
+async function closeScratch(t, count, name = null) {
+    const ours = (n) => n === name || /^live-[\w-]+\.indd$/.test(n ?? '');
+    for (let now = await documents(t); now.count > count && ours(now.active); now = await documents(t)) {
+        await t.call('close_document');
     }
 }
 
@@ -131,6 +137,7 @@ export function scenarios(out) {
         })],
 
         readScenario(inNewDocument),
+        ...fileScenarios(inNewDocument, out, { documents, closeScratch }),
 
         ['close', async (t) => {
             // close_document is checked on its own document: its effect is that the document is gone.
