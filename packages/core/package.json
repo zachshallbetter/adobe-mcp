@@ -6,7 +6,8 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
-    "./testing": "./src/testing/audit.js"
+    "./testing": "./src/testing/audit.js",
+    "./testing/live": "./src/testing/live.js"
   },
   "files": [
     "src/",
