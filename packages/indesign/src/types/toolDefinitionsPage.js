@@ -53,7 +53,7 @@ export const pageToolDefinitions = [
     },
     {
         name: 'get_page_info',
-        description: 'Get detailed information about a specific page',
+        description: 'Get detailed information about a specific page: bounds, size and margins in mm, side, applied parent, section, columns, page colour, layout rule and snapshot blending',
         inputSchema: {
             type: 'object',
             properties: {
