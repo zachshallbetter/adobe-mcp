@@ -73,6 +73,29 @@ test('the audit captures scripts with the executor stubbed', async () => {
     assert.equal(await executor.runScript('x'), 'live run', 'the stub is removed afterwards');
 });
 
+test('executor: <PREFIX>_ACTIVATE=false keeps the app in the background except for menu commands', { skip: process.platform === 'win32' }, async () => {
+    const calls = [];
+    const executor = createExecutor({
+        label: 'Illustrator', envPrefix: 'ADOBE_MCP_TEST', appNamePrefix: 'Adobe Illustrator', defaultAppName: 'Adobe Illustrator',
+        macScript: ({ scriptPath }) => `do javascript (POSIX file "${scriptPath}")`,
+        run: async (file, args) => { calls.push(args[1]); return args[1].includes('System Events') ? '' : 'done'; },
+    });
+    process.env.ADOBE_MCP_TEST_APP_NAME = 'Adobe Illustrator';
+    const activated = async (script) => { await executor.runScript(script); return /\n    activate\n/.test(calls.at(-1)); };
+    try {
+        assert.equal(await activated('app.name;'), true, 'activates by default');
+        process.env.ADOBE_MCP_TEST_ACTIVATE = 'false';
+        assert.equal(await activated('app.name;'), false, 'background when ACTIVATE=false');
+        assert.equal(await activated('app.executeMenuCommand("group");'), true, 'menu commands still activate');
+        assert.equal(await activated('app.menuActions.itemByID(1).invoke();'), true);
+        process.env.ADOBE_MCP_TEST_ACTIVATE = 'true';
+        assert.equal(await activated('app.name;'), true);
+    } finally {
+        delete process.env.ADOBE_MCP_TEST_APP_NAME;
+        delete process.env.ADOBE_MCP_TEST_ACTIVATE;
+    }
+});
+
 test('executor: macOS AppleScript, timeout and temp-file cleanup', { skip: process.platform === 'win32' }, async () => {
     const calls = [];
     const executor = createExecutor({

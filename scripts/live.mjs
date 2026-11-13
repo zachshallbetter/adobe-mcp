@@ -4,7 +4,8 @@
 //
 //   node scripts/live.mjs <app> [--atlas <atlas checkout>] [--only <scenario regex>]
 //
-// The app must already be open. Scenarios are in packages/<app>/tests/live/index.js and
+// The app must already be open; it is left in the background (<APP>_ACTIVATE=false) except
+// for menu commands. Scenarios are in packages/<app>/tests/live/index.js and
 // work only in ~/Documents/adobe-mcp-validation. Records go to
 // <atlas>/corpus/<app>/validation/<date>.json (default atlas: ../adobe-capability-atlas).
 // Never run in CI.
@@ -36,7 +37,8 @@ const os = `macOS ${execFileSync('sw_vers', ['-productVersion'], { encoding: 'ut
 const report = await runLive({
     app: atlasApp,
     command: join(pkgDir, pkg.bin[pkg.name]),
-    env: { [`${app.toUpperCase()}_ALLOWED_DIRS`]: scratch },
+    // The app stays behind your windows; it comes forward only for menu commands.
+    env: { [`${app.toUpperCase()}_ALLOWED_DIRS`]: scratch, [`${app.toUpperCase()}_ACTIVATE`]: 'false' },
     scenarios: scenarios(join(scratch, 'out', app)).filter(([name]) => !only || only.test(name)),
     status,
     server: `${pkg.name}@${pkg.version} (adobe-mcp ${sha}${dirty})`,

@@ -217,6 +217,7 @@ Common knobs (see each package README for the full set):
 | `ILLUSTRATOR_ALLOWED_DIRS` | Extra directories Illustrator tools may read/write |
 | `INDESIGN_APP_NAME` / `ILLUSTRATOR_APP_NAME` | Override the target application name |
 | `INDESIGN_SCRIPT_TIMEOUT_MS` / `ILLUSTRATOR_SCRIPT_TIMEOUT_MS` | Per-script timeout |
+| `INDESIGN_ACTIVATE`, `ILLUSTRATOR_ACTIVATE`, `PHOTOSHOP_ACTIVATE`, `AFTEREFFECTS_ACTIVATE` | macOS: `false` leaves the app in the background; it comes to the front only for menu commands and Actions. Default `true` |
 | `PREMIERE_WS_PORT`, `BRIDGE_TOKEN`, `PREMIERE_ALLOWED_DIRS` | Premiere UXP bridge |
 
 ### Smoke-check without an MCP client
