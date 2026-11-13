@@ -53,9 +53,7 @@ const { ok, result, error } = await executor.runStructured('app.documents.length
   timeout the error says a dialog may be open in the application, which is the
   usual cause.
 - On macOS the application is brought to the front before each script, unless
-  `<PREFIX>_ACTIVATE=false`: then only scripts matching `needsFront` (default
-  `FRONT_ONLY`: menu commands) bring it forward, and everything else runs with it
-  in the background.
+  `<PREFIX>_ACTIVATE=false`: then every script runs with it in the background.
 - `backends` adds alternatives to ExtendScript, such as InDesign's UXP bridge.
   `<PREFIX>_BACKEND=auto` uses the first available one and falls back to
   ExtendScript only when the backend could not have run the script.

@@ -12,7 +12,7 @@ export { autoCaptureResult, wrapScriptForStructuredResult, parseStructuredResult
 export { createFailureDetector, looksLikeFailure, formatResponse, formatErrorResponse, withWarnings } from './result.js';
 export { createArgNormalizer, distance } from './args.js';
 export { createAnnotations } from './annotations.js';
-export { createExecutor, runProcess, appleScriptString, powerShellString, FRONT_ONLY } from './executor.js';
+export { createExecutor, runProcess, appleScriptString, powerShellString } from './executor.js';
 export { ControlClient, createControlClient } from './control-client.js';
 export { createCraftHarness, resolveExecutionRoute } from './craft-harness.js';
 export { createMcpServer } from './server.js';
