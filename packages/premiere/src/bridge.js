@@ -101,8 +101,8 @@ export function createBridge({
 
     function notConnected() {
         return failure('NOT_CONNECTED',
-            `Premiere Pro is not connected. Open Premiere Pro 25.6 or later, load the plugin in ${pluginDir} with the UXP Developer Tool, `
-            + `and open its MCP Bridge panel from the Window menu; it connects to port ${port}`
+            `Premiere Pro is not connected. Open Premiere Pro 25.6 or later, install the plugin with 'adobe-mcp-premiere install-plugin' `
+            + `(or load ${pluginDir} with the UXP Developer Tool), and open its MCP Bridge panel from the Window menu; it connects to port ${port}`
             + `${token ? ' and needs the same token as BRIDGE_TOKEN' : ''}. premiere_status shows the connection.`);
     }
 
