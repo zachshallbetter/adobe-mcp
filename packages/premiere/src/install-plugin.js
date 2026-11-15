@@ -42,12 +42,20 @@ export function packagePlugin(outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ad
 }
 
 /** Install the packaged plugin with UPIA. Returns { ok, output }. */
-export function installPlugin(ccx, upia = upiaPath()) {
+export function installPlugin(ccx, upia = upiaPath(), { attempts = 4, delayMs = 5000 } = {}) {
     if (!upia || !fs.existsSync(upia)) {
         return { ok: false, output: 'Adobe\'s plugin installer (part of the Creative Cloud app) was not found. Install the Creative Cloud app, or load the plugin with the UXP Developer Tool.' };
     }
-    const result = spawnSync(upia, ['--install', ccx], { encoding: 'utf8', timeout: 180000 });
-    const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+    // When the Creative Cloud helper is not running yet, UPIA starts it and exits without
+    // reporting a result; once the helper is up, the same command installs. Retry that case.
+    let result;
+    let output;
+    for (let attempt = 1; ; attempt++) {
+        result = spawnSync(upia, ['--install', ccx], { encoding: 'utf8', timeout: 180000 });
+        output = `${result.stdout || ''}${result.stderr || ''}`.trim();
+        if (/success|fail|error|status =/i.test(output) || attempt >= attempts) break;
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
+    }
     // UPIA exits 0 even for some failures; it reports success in words.
     const ok = result.status === 0 && /success/i.test(output) && !/fail|error/i.test(output);
     let text = output || result.error?.message || `exit ${result.status}`;

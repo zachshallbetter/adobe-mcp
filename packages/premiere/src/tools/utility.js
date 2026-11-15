@@ -23,7 +23,7 @@ export const tools = [
             }
             const status = { ...(await executor.status()), pluginFolder: PLUGIN_DIR };
             if (!status.connected) {
-                return formatErrorResponse({ ...status, error: 'Premiere Pro is not connected: load the plugin folder with the UXP Developer Tool and open its MCP Bridge panel in Premiere Pro' }, 'Status');
+                return formatErrorResponse({ ...status, error: 'Premiere Pro is not connected: install the plugin with `adobe-mcp-premiere install-plugin` (or load the plugin folder with the UXP Developer Tool), then open Window > UXP Plugins > MCP Bridge in Premiere Pro' }, 'Status');
             }
             if (a.probe === false) return formatResponse(status, 'Status', () => false);
             try {

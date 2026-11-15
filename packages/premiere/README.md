@@ -7,11 +7,13 @@ installed and talks to it through a small UXP plugin inside Premiere Pro.
 
 **Status: untested against a real Premiere Pro.** Every script is checked
 against Premiere Pro's UXP API reference and run against a stand-in DOM in the
-tests, but none has been run in Premiere Pro yet. Expect rough edges; see
+tests, but none has been run in Premiere Pro yet. The plugin itself installs and
+connects to Premiere Pro 27.0. Expect rough edges; see
 [What is not certain yet](#what-is-not-certain-yet).
 
-Requires Premiere Pro 25.6 or later (macOS or Windows), the UXP Developer Tool
-to load the plugin, and Node.js 18 or later.
+Requires Premiere Pro 25.6 or later (macOS or Windows), the MCP Bridge plugin
+(installed with `adobe-mcp-premiere install-plugin`, or loaded with the UXP
+Developer Tool), and Node.js 18 or later.
 
 ## Why a plugin
 
@@ -66,8 +68,8 @@ There is one process to run: the MCP server is also the WebSocket server.
    This packages the plugin as a `.ccx` and installs it with Adobe's Unified
    Plugin Installer Agent, which comes with the Creative Cloud app. Then open
    Premiere Pro and choose **Window > UXP Plugins > MCP Bridge**; the panel
-   connects to the server by itself. *Not yet verified against a real Premiere Pro
-   install (creative-mcp#17).* If the installer reports status -411, Creative Cloud
+   connects to the server by itself. Verified with Premiere Pro 27.0 on macOS: the
+   plugin installs without Developer Mode, and the panel connects. If the installer reports status -411, Creative Cloud
    doesn't see a compatible Premiere Pro yet: update it, open it once and run the
    command again. `install-plugin --package` only writes the `.ccx`, which you can
    also double-click.
