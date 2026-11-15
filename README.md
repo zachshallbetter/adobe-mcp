@@ -4,6 +4,12 @@ MCP servers for Adobe applications. Install one application's server on its
 own, or the suite: one server for every application, with tools that work
 across them.
 
+adobe-mcp is part of [Creative MCP](https://creativemcp.com), an independent,
+open-source series of MCP servers for creative software. The
+[Adobe MCP page](https://creativemcp.com/apps.html) shows setup for each
+client, and the [Creative MCP repository](https://github.com/zachshallbetter/creative-mcp)
+holds the installer, the registry and the website.
+
 The InDesign server was published as `indesign-mcp-server` up to 2.3.0. It is
 now `adobe-mcp-indesign`, with the same tools; replace the package name in your
 client configuration.
