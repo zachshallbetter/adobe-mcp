@@ -194,25 +194,30 @@ export class PageHandlers {
      */
     static async getPageInfo(args) {
         const p = index(args.pageIndex, { name: 'pageIndex' });
-        const body = [
+        // Bounds and margins in mm (the document's own units vary); enums by name.
+        const body = jsxWithMillimeters([
+            'var r = function (v) { return Math.round(v * 1000) / 1000; };',
             'var info = "=== PAGE INFO ===\\n";',
             'info += "Index: " + page.documentOffset + "\\n";',
             'info += "Name: " + page.name + "\\n";',
             'info += "Label: " + page.label + "\\n";',
-            'info += "Bounds: " + page.bounds + "\\n";',
-            'info += "Side: " + page.side + "\\n";',
+            'var pb = page.bounds;',
+            'info += "Bounds (mm: top, left, bottom, right): " + r(pb[0]) + ", " + r(pb[1]) + ", " + r(pb[2]) + ", " + r(pb[3]) + "\\n";',
+            'info += "Size (mm): " + r(pb[3] - pb[1]) + " x " + r(pb[2] - pb[0]) + "\\n";',
+            'info += "Side: " + page.side.toString() + "\\n";',
             'var am = page.appliedMaster;',
             'info += "Applied Master: " + ((am && am != NothingEnum.NOTHING && am.isValid) ? am.name : "None") + "\\n";',
             'info += "Section: " + page.appliedSection.name + "\\n";',
             'var mp = page.marginPreferences;',
-            'info += "Margins (top, left/inside, bottom, right/outside): " + mp.top + ", " + mp.left + ", " + mp.bottom + ", " + mp.right + "\\n";',
+            'info += "Margins (mm: top, left/inside, bottom, right/outside): " + r(mp.top) + ", " + r(mp.left) + ", " + r(mp.bottom) + ", " + r(mp.right) + "\\n";',
             'info += "Columns: " + mp.columnCount + "\\n";',
-            'info += "Page Color: " + page.pageColor + "\\n";',
+            'var pc = page.pageColor;',
+            'info += "Page Color: " + (pc instanceof Array ? "RGB " + pc.join(", ") : pc.toString()) + "\\n";',
             'info += "Optional Page: " + page.optionalPage + "\\n";',
-            'info += "Layout Rule: " + page.layoutRule + "\\n";',
-            'info += "Snapshot Blending Mode: " + page.snapshotBlendingMode + "\\n";',
+            'info += "Layout Rule: " + page.layoutRule.toString() + "\\n";',
+            'info += "Snapshot Blending Mode: " + page.snapshotBlendingMode.toString() + "\\n";',
             'out = info;',
-        ];
+        ]);
         return run(pageScript(p, 'Error reading page info', body), 'Get Page Info');
     }
 

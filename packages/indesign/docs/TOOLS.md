@@ -655,7 +655,7 @@ Navigate to a page: make it the active page of the document's layout window
 
 ### `get_page_info`
 
-Get detailed information about a specific page
+Get detailed information about a specific page: bounds, size and margins in mm, side, applied parent, section, columns, page colour, layout rule and snapshot blending
 
 *read-only*
 

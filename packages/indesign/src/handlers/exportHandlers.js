@@ -213,8 +213,10 @@ export class ExportHandlers {
         const exportLines = kind === 'REFLOWABLE'
             ? [
                 'var ep = doc.epubExportPreferences;',
-                'var __prev = [ep.generateCascadeStyleSheet, ep.includeClassesInHTML, ep.embedFont, ep.epubTitle];',
+                'var __prev = [ep.generateCascadeStyleSheet, ep.includeClassesInHTML, ep.embedFont, ep.epubTitle, app.epubViewingAppsPreferences.viewDocumentAfterExport];',
                 'try {',
+                // Never open the EPUB in a reader app: the export runs unattended.
+                '  app.epubViewingAppsPreferences.viewDocumentAfterExport = false;',
                 `  ep.generateCascadeStyleSheet = ${bool(includeStyles)};`,
                 `  ep.includeClassesInHTML = ${bool(includeStyles)};`,
                 `  ep.embedFont = ${bool(embedFonts)};`,
@@ -225,16 +227,19 @@ export class ExportHandlers {
                 '  ep.includeClassesInHTML = __prev[1];',
                 '  ep.embedFont = __prev[2];',
                 '  ep.epubTitle = __prev[3];',
+                '  app.epubViewingAppsPreferences.viewDocumentAfterExport = __prev[4];',
                 '}',
             ]
             : [
                 'var fx = doc.epubFixedLayoutExportPreferences;',
-                'var __prevTitle = fx.epubTitle;',
+                'var __prevTitle = fx.epubTitle, __prevView = app.epubViewingAppsPreferences.viewDocumentAfterExport;',
                 'try {',
+                '  app.epubViewingAppsPreferences.viewDocumentAfterExport = false;',
                 ...(hasTitle ? [`  fx.epubTitle = ${str(title)};`] : []),
                 '  doc.exportFile(ExportFormat.FIXED_LAYOUT_EPUB, epubFile, false);',
                 '} finally {',
                 '  fx.epubTitle = __prevTitle;',
+                '  app.epubViewingAppsPreferences.viewDocumentAfterExport = __prevView;',
                 '}',
             ];
 

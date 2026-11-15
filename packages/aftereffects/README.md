@@ -105,6 +105,7 @@ Network, which file operations need.
 | `AFTEREFFECTS_EXE` | Windows: path to `AfterFX.exe`. |
 | `AFTEREFFECTS_ALLOWED_DIRS` | Extra directories for importing, saving and rendering (`:`-separated on macOS, `;` on Windows). |
 | `AFTEREFFECTS_SCRIPT_TIMEOUT_MS` | How long to wait for After Effects. Default 120000. |
+| `AFTEREFFECTS_ACTIVATE` | macOS: `false` runs scripts with After Effects left in the background. If a menu command doesn't take effect that way, leave it at the default. Default `true` (brought to the front for every script). |
 | `AFTEREFFECTS_TARGET` | Set to `craft` to route commands to EffectCraft. |
 | `EFFECTCRAFT_CONTROL_PORT` | Port for EffectCraft bridge (default `9877`). |
 

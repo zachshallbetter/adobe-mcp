@@ -363,7 +363,7 @@ export class MasterSpreadHandlers {
             'var parentMaster = ms.appliedMaster;',
             'info += "Based On: " + ((parentMaster && parentMaster != NothingEnum.NOTHING && parentMaster.isValid) ? parentMaster.name : "None") + "\\n";',
             'info += "Show Master Items: " + ms.showMasterItems + "\\n";',
-            'info += "Page Color: " + ms.pageColor + "\\n";',
+            'info += "Page Color: " + ms.pageColor.toString() + "\\n";',
             'info += "Index: " + ms.index + "\\n";',
             'info += "ID: " + ms.id + "\\n";',
             'var ptf = ms.primaryTextFrame;',
