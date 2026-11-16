@@ -34,6 +34,10 @@ permissions:
 env:
   MCP_PUBLISHER_VERSION: v1.8.1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   status:
     runs-on: ubuntu-latest
