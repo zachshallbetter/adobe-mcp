@@ -6,12 +6,9 @@
 | Illustrator | adobe-mcp-illustrator | 0.9.1 | 0.9.0 | 308 | 2,540 | 1,951 | 1,562 (61%) |
 | Photoshop | adobe-mcp-photoshop | 0.1.0 | 0.1.0 | 207 | 2,609 | 1,720 | 1,584 (61%) |
 | After Effects | adobe-mcp-aftereffects | 0.1.0 | 0.1.0 | 164 | 3,198 | 2,595 | 2,555 (80%) |
-| Premiere Pro | adobe-mcp-premiere | 0.1.0 | 0.2.0 | 96 | 925 | 494 | 413 (45%) |
+| Premiere Pro | adobe-mcp-premiere | 0.2.0 | 0.2.0 | 96 | 925 | 494 | 413 (45%) |
 | Suite | adobe-mcp-suite | 0.3.0 | 0.2.1 | 1,200 | — | — | — |
 | Core | adobe-mcp-core | 0.3.0 | 0.3.0 | | | | |
-
-Premiere Pro 0.2.0 is tagged, but its release run failed at `npm publish` with
-`E404` (see [releasing.md](releasing.md)); it needs publishing from a terminal.
 
 Every app server and suite 0.3.0 are in the MCP Registry. Homebrew
 (`zachshallbetter/tap/adobe-mcp`) installs suite 0.3.0.
