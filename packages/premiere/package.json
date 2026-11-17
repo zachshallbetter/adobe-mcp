@@ -1,6 +1,6 @@
 {
   "name": "adobe-mcp-premiere",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for Adobe Premiere Pro: projects, bins, sequences, timeline editing, markers, effects, transitions, transcripts, metadata and export through a UXP plugin",
   "mcpName": "io.github.zachshallbetter/adobe-mcp-premiere",
   "type": "module",
@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/zachshallbetter/adobe-mcp/tree/main/packages/premiere#readme",
   "dependencies": {
-    "adobe-mcp-core": "0.2.0",
+    "adobe-mcp-core": "0.3.0",
     "ws": "^8.21.3"
   },
   "devDependencies": {

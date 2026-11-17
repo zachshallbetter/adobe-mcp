@@ -64,7 +64,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "adobe-mcp-core": "0.2.0",
+    "adobe-mcp-core": "0.3.0",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "express": "^4.22.3",
     "ws": "^8.21.3"
