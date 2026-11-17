@@ -25,7 +25,7 @@ Trusted publishing is set for `adobe-mcp-core`, `adobe-mcp-indesign`,
 
 ## Core versions
 
-Every app package and the suite pin `adobe-mcp-core@0.2.0`. In the workspace, npm
+Every app package and the suite pin `adobe-mcp-core@0.3.0`. In the workspace, npm
 links the local core because the pin matches its version. When an app needs a newer
 core, release the core first, then move that app's pin.
 
