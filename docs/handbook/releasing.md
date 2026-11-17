@@ -18,10 +18,14 @@ to npm and publishes `server.json` to the MCP Registry, both through GitHub OIDC
 - **Deprecations** on npm need the owner's browser approval too.
 - Releases of packages with trusted publishing set need nobody: just the tag.
 
-Trusted publishing is set for `adobe-mcp-core`, `adobe-mcp-indesign`,
-`adobe-mcp-illustrator`, `adobe-mcp-suite`, `adobe-mcp-photoshop`,
-`adobe-mcp-aftereffects` and `adobe-mcp-premiere`, all for `release.yml` in
-`zachshallbetter/adobe-mcp`.
+Trusted publishing works for `adobe-mcp-core`, `adobe-mcp-indesign`,
+`adobe-mcp-illustrator` and `adobe-mcp-suite`, all for `release.yml` in
+`zachshallbetter/adobe-mcp`. For `adobe-mcp-photoshop`, `adobe-mcp-aftereffects` and
+`adobe-mcp-premiere`, `npm publish` in the release job fails with `E404`: npm doesn't
+accept the workflow as their trusted publisher. Until their entries on npmjs.com
+are fixed, the owner publishes those versions from a terminal (`npm publish
+--workspace packages/<app>` on the tag) and re-runs the release, which then skips
+npm and publishes to the MCP Registry.
 
 ## Core versions
 

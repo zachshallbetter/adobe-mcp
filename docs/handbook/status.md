@@ -8,7 +8,10 @@
 | After Effects | adobe-mcp-aftereffects | 0.1.0 | 0.1.0 | 164 | 3,198 | 2,595 | 2,555 (80%) |
 | Premiere Pro | adobe-mcp-premiere | 0.1.0 | 0.2.0 | 96 | 925 | 494 | 413 (45%) |
 | Suite | adobe-mcp-suite | 0.3.0 | 0.2.1 | 1,200 | — | — | — |
-| Core | adobe-mcp-core | 0.2.0 | 0.3.0 | | | | |
+| Core | adobe-mcp-core | 0.3.0 | 0.3.0 | | | | |
+
+Premiere Pro 0.2.0 is tagged, but its release run failed at `npm publish` with
+`E404` (see [releasing.md](releasing.md)); it needs publishing from a terminal.
 
 Every app server and suite 0.3.0 are in the MCP Registry. Homebrew
 (`zachshallbetter/tap/adobe-mcp`) installs suite 0.3.0.
