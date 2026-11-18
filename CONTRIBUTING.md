@@ -42,6 +42,22 @@ prefixes their tools. To add an application to it, register its loader in
 its scripts through each application's `runStructured`, and is tested with both
 applications stubbed.
 
+## Setup
+
+```bash
+npm install      # installs every package and links them together (Node 18 or later; CI uses 22)
+npm run check    # syntax check, every package
+npm test         # every package's tests
+```
+
+Run one package's tests with `npm test -w packages/illustrator`.
+
+## Conventions
+
+- Commit subjects are short and imperative, for example `Release adobe-mcp-core 0.3.0 and
+  adobe-mcp-premiere 0.2.0`. The repository does not enforce a format.
+- Keep a change to one concern, and keep each package's changelog current when it ships.
+
 ## Before a pull request
 
 - `npm run check && npm test` pass at the repository root. CI runs both.
