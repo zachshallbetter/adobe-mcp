@@ -9,9 +9,9 @@
 
 ## Reporting a vulnerability
 
-Please report vulnerabilities privately through GitHub: open the repository's **Security** tab and choose **Report a vulnerability**. Do not open a public issue for a security problem.
+Please report vulnerabilities privately through GitHub private vulnerability reporting: <https://github.com/zachshallbetter/adobe-mcp/security/advisories/new>. Do not open a public issue for a security problem.
 
-Include the package and its version, the platform (macOS or Windows, and the Adobe application's version), the tool and arguments involved, and what an attacker could achieve. You should get an initial response within a week.
+Include the package and its version, the platform (macOS or Windows, and the Adobe application's version), the tool and arguments involved, and what an attacker could achieve. This is a solo-maintained project: responses are best-effort with no SLA.
 
 ## What this server can do
 

@@ -318,6 +318,13 @@ and [docs/handbook/](docs/handbook/README.md) for the full handbook: architectur
 rules for writing tools, how work is planned from the capability atlas and landed,
 current status, and lessons learned.
 
+## Status and limitations
+
+[docs/handbook/status.md](docs/handbook/status.md) records what is published, what is on `main`
+and how much of each application's scripting surface the tools cover. The Premiere Pro server has
+not yet been tested against Premiere Pro. The static audits do not prove a tool works in the real
+application.
+
 ## Licence
 
 MIT. See each package's LICENSE.
