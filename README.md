@@ -328,3 +328,5 @@ application.
 ## Licence
 
 MIT. See each package's LICENSE.
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/zachshallbetter-adobe-mcp-1q0hh6)](https://m8ven.ai/mcp/zachshallbetter-adobe-mcp-1q0hh6?s=readme)
